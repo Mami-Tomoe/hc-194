@@ -6,8 +6,8 @@ function hc.teleport.init()
 	hc.add_menu_command('Teleport', hc.teleport.teleport_menu_command, hc.TELEPORT_LEVEL, hc.ADMIN_MENU_KEY,
 		{ category = 'Modify' })
 
-	hc.add_say_command('tp', hc.teleport.teleport_say_command, hc.TELEPORT_LEVEL, '<id> [<pl>]',
-		'Teleports the stated player to you or to the stated player.', true)
+	hc.add_say_command('tp', hc.teleport.teleport_say_command, hc.TELEPORT_LEVEL, '<id1> <id2>',
+		'Teleports player A to player B.', true)
 end
 
 -------------------------------------------------------------------------------
