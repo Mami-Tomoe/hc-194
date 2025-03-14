@@ -1,0 +1,5 @@
+-- Module name:
+'teleport'
+
+-- Permissions:
+hc.TELEPORT_LEVEL = hc.MODERATOR

@@ -1,0 +1,3 @@
+Adds the "tp" say command which allows teleporting player A to player B.
+
+Adds the "Teleport" menu command which allows teleporting player A to player B.
