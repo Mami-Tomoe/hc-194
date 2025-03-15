@@ -1,0 +1,1 @@
+Show a damage indicator text HUD upon hitting an enemy.
