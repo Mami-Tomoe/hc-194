@@ -1,0 +1,3 @@
+1. Move "showdamage.lua" to "CS2D/sys/lua/hc/modules/showdamage.lua"
+2. Implement "config.txt" inside "CS2D/sys/la/hc/hc.conf"
+	a. Add the "showdamage" to the hc.modules table.
