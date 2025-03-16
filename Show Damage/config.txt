@@ -1,2 +1,2 @@
 Module name:
-'showdamage'
+'show_damage'
