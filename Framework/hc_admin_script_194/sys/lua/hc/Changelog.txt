@@ -1,0 +1,371 @@
+
+HC CS2D Admin Script
+
+Changelog
+====================
+
+1.9.4 16/03/2025
+Bugs Fixed:
+* Moved the "maps" module HUD texts to the centre of the screen, so it won't hide the chat box anymore.
+* For some reason the HUD scale was set to 2, I changed it to 1, this may become a problem later, but it's a step in the right direction.
+
+Features removed:
+* Removed the (mostly broken) "teambalance" module.
+
+1.9.4 25/03/2021
+----------------
+Bugs Fixed:
+* Fixed player names that started with ( disabled menu buttons.
+
+1.9.4 01/03/2021
+----------------
+Bugs Fixed:
+* Fixed moderation.lua 's identify menu.
+
+1.9.4 07/12/2020
+----------------
+Bugs Fixed:
+* The function hc.get_login(p) will have proper outputs under all circumstances (unless login is true ).
+> String containing the login number.
+> String containing the number 0, if no login is found.
+
+1.9.4 29/11/2020
+----------------
+Features Changed:
+* Wall menu command now uses the main config file to evaluate permissions, rather than the module itself.
+
+1.9.4 06/02/2020
+----------------
+Bugs Fixed:
+* Internal login ID management issues.
+
+1.9.4 29/11/2020
+----------------
+Bugs Fixed:
+* Wall menu command permissions were not placed in the configuration file.
+
+1.9.4 07/12/2019
+----------------
+New Features:
+* Now supports STEAM saves, users and bans.
+* Now supports 16:9 resolutions.
+* Clock and map vote resized.
+* Compressed server transfer files.
+
+Bugs Fixed:
+* Clock no longer hides in-game HUD elements.
+* Map vote no longer hides the chat box.
+* Editor no longer hides when the player is dead.
+
+
+1.9.3 2011-12-03
+----------------
+Features Removed:
+* Upgrading supplies to super supplies is no longer blocked.
+
+Bugs Fixed:
+* Aligned "Next map" text with map name.
+* Moved clock to top left corner to avoid clash with next map name.
+
+
+1.9.2 2011-05-25
+----------------
+New Features:
+* Added servertransfer.lst and server.lua to simplify installation.
+
+
+1.9.1 2011-01-23
+----------------
+New Features:
+* Game mode change at map change.  (Suggested by Nari.)
+
+
+1.9.0 2010-09-12
+----------------
+New Features:
+* Flag capturer is credited. (Suggested by made in Finland.)
+* Menu Command: Statistics/Number of Buildings  (All) (Suggested by ELC.)
+  - Show the number of buildings that belong to you.
+
+Features Changed:
+* Menu Command: Change Team  (Moderator level 1)
+  - Players can be locked to spectator mode. (Suggested by 1st Alex.)
+* Offline messages can now be forwarded. (Suggested by Piral.)
+* Say Command: !<id> changed to !<id>[,<id>...]  (All)
+  - PM's can be sent to multiple recipients.
+  - Example: !2,13 hello
+             Sends "hello" to players #2 and #13.
+* Say Command: !mm  (All)
+  - Level changed to Moderator 1. It's now a moderator internal chat room.
+    Other players that wish to talk to a moderator should send PM's.
+* Auto team balance now restores a player's items when spawning. (Suggested
+  by Piral.)
+
+Features Removed:
+* Say Command: !mr  (All)
+
+
+1.8.1 2010-08-28
+----------------
+Features Changed:
+* Not possible to use @C in messages anymore (abused).
+
+Bugs fixed:
+* Spam about supplies at round end and when player left.
+* When players left, their attributes were not freed properly.
+
+
+1.8.0 2010-08-26
+----------------
+New Features:
+* Say Command: !vm  (VIP)
+  - Send a message to all VIP's. (Suggested by Piral.)
+* Prevent supplies from being upgraded to super supplies.
+
+Features Changed:
+* New say colours:
+  - army green  (Suggested by Da Boss.)
+  - brown
+  - olive green  (Suggested by Piral.)
+* Possibility to pause composing in editor. (Suggested by Piral.)
+* Form like editor background when player is alive.
+* More lines in editor.
+* Confirm message when sending offline message. (Suggested by Piral.)
+* Multiple recipients for offline messages.
+* New emoticon: Heart. (Suggested by Da Boss.)
+* New player attribute: Snowman (thanks to Piral).
+* Say Command: !ombc  (Moderator level 2)
+  - Messages can now be sent to either:
+    + All
+    + VIP's
+    + Moderators level 1
+    + Moderators level 2
+    + Moderators
+    + Administrators
+    (Suggested by Da Boss.)
+
+Bugs fixed:
+* "Nothing to send!" was shown to everyone. (Found by Piral.)
+* Removed VIP's could still have attributes. (Found by Piral.)
+* Editor menu title was always "Editor". (Found by Piral.)
+* Supervising increased the number of deaths in statistics. (Found by Piral.)
+
+
+1.7.1 2010-08-15
+----------------
+Features Changed:
+* Made emoticons semi-transparent.
+* The editor is now used to display statistics. (Suggested by 1st Alex.)
+* More descriptive editor titles. (Suggested by Piral.)
+
+Bugs fixed:
+* Timer bug caused spam when map round limit was reached.
+
+
+1.7.0 2010-08-14
+----------------
+New Features:
+* Emoticons. (Suggested by Piral.)
+  - Shown in a speech bubble next to the player when he writes a smiley.
+
+Features Changed:
+* New player attributes:
+  - Party hat (thanks to Piral).
+  - Pumpkin head (thanks to Piral).
+* The editor now handles loading and saving of drafts. It also autosaves
+  drafts at map change and when player leaves. (Suggested by ELC.)
+
+
+1.6.1 2010-08-02
+----------------
+Features Changed:
+* New player attributes:
+  - Pirate hat (thanks to Piral).
+  - Metal helmet (replaces silver helmet, thanks to Piral).
+* Say Command: !ombc  (Moderator level 2)
+  - Messages are now tagged as broadcast messages. (Suggested by ELC.)
+
+Bugs fixed:
+* Editor can't handle semicolons, so they are now replaced with colons.
+* New attempt to make attributes being restored at round start.
+
+
+1.6.0 2010-08-01
+----------------
+New Features:
+* Say Command: !ombc  (Moderator level 2)
+  - Send an offline message to all users. (Suggested by Piral.)
+
+Features Changed:
+* Multi-line messages:
+  - Created a simple menu-driven editor to make editing easier.
+* Offline messages:
+  - The editor is used for viewing and composing messages.
+  - Messages are not deleted automatically when read.
+  - Messages can be replied to.
+
+Bugs fixed:
+* Attributes weren't restored at round start.
+
+
+1.5.0 2010-07-30
+----------------
+New Features:
+* Menu Command: Vote Kick  (VIP)
+  - Vote to kick a player. Per default, two votes are required for kicking.
+    (Suggested by ELC.)
+* Player attributes for VIP's, moderators and admins. (Suggested by Da Boss.)
+
+Features Changed:
+* All messaging commands (!<id>, !bc, !mm, !mr and !om) now support multi-line
+  messages. Leave out the message to start composing. (Suggested by Piral.)
+
+Features Removed:
+* Say Command: !pm  (All)
+  - Use !<id> instead.
+
+
+1.4.0 2010-07-24
+----------------
+New Features:
+* Map round time limit. When the limit is reached, the number of remaining
+  rounds is decreased by one.
+* Menu Command: Statistics/Show to me  (All)
+  - Show own statistics privately.
+
+Features Changed:
+* If two maps are tied when map voting, the one that did *not* receive the
+  last vote will win.
+* Say Command: !om  (VIP)
+  - Added support for multi-line messages. Type !om without any argument to
+    start composing.
+* Menu Command: Statistics/Show  (All)
+  - Changed to Statistics/Show to all.
+* Cooldown time for map voting (default 5 seconds).
+* Changed format for all files to true CSV.
+  THIS MAY CAUSE SOME OLD DATA TO GET LOST OR CORRUPTED!
+* Time played added to stats.
+* Menu Command: Discipline/Remove Buildings  (Moderator level 2)
+  - Split "Teleporters" into "Teleporter Entrances" and "Teleporter Exits".
+
+Bugs fixed:
+* Top command showed too many entries sometimes.
+* Stats didn't work in gungame.
+* Supervise didn't work properly in gungame.
+* Number of kills in stats was increased when a player was team balanced
+  automatically or by a moderator.
+
+
+1.3.0 2010-07-21
+----------------
+New Features:
+* Menu Command: Discipline/Remove Buildings  (Moderator level 2)
+  - Remove a player's buildings.
+* Player statistics are now saved and restored.
+* Menu Command: Statistics/Show  (All)
+  - Show current and total player statistics.
+* Menu Command: Statistics/Reset  (All)
+  - Reset player statistics (current and total).
+* Menu Command: Statistics/Top  (All)
+  - Lists the top players.
+
+Features Changed:
+* Command menu has been split in two.
+  - F3 for moderation and administration.
+  - F2 for everything else.
+* Say Command: !editname  (Administrator)
+  - Changed default level to Moderator level 2. Moderators can only edit the
+    names of VIP players.
+* Player holding flag will not be requested to go and win if the other team
+  has possession of their flag.
+* Say Command: !help  (All)
+  - Changed to menu command: Help/List Say Commands
+* Say Command: !about  (VIP)
+  - Changed to menu command: Help/About  (All)
+* Say Command: !online  (VIP)
+  - Changed to menu command: Check/Online
+* users.hcu moved from data to data/config. 
+
+Bugs Fixed:
+* Players' config wasn't saved at map change.
+
+
+1.2.0 2010-07-04
+----------------
+New Features:
+* Users file is automatically reloaded at round start.
+* Say Command: !stats  (All)
+  - Shows player statistics for the current session:
+    + Kills
+    + Deaths
+    + Kills per deaths
+    + Team kills
+    + Captures (in CTF maps)
+    + Dominations (in DOM maps)
+    + Bomb plants/explosions/defusals (in DE maps)
+    + Hostage rescues (in CS maps)
+
+Features Changed:
+* Maps are now specified in hc.conf instead of being read from a file.
+* 'kpd' module replaced by 'playerstats'.
+
+Bugs Fixed:
+* In normal game mode, dead VIP's, moderators and admins could talk to living
+  team members.
+* Censored speech function is now more discreet. If the message was not
+  intended for everyone, it will not reveal the censored message for
+  everyone either.
+
+
+1.1.0 2010-06-27
+----------------
+New Features:
+* Menu Command: Administrate/Remove VIP  (Moderator level 2)
+  - Take away VIP authority from a player.
+
+Features Changed:
+* Say Command: !about  (Administrator)
+  - Changed default level to VIP.
+* Say Command: !online  (Administrator)
+  - Changed default level to VIP.
+
+Bugs Fixed:
+* Say tag setting wasn't retained.
+* Team balance function decreased the number of deaths for the wrong player.
+* Timer bug caused users to be muted for too long.
+
+
+1.0.0 2010-06-18
+----------------
+New Features:
+* Support for VIP Users.
+  - VIP Users can change their say colour and they have an optional /VIP/ tag.
+    They can also send and receive offline messages.
+* Menu Command: Administrate/Make VIP  (Moderator level 2)
+  - Make a logged on player VIP. Player must have a U.S.G.N. account.
+* Menu Command: Discipline/Censor Name  (Moderator level 2)
+  - Change the name of a player to "Player".
+* Menu Command: Config/Say Tag  (VIP)
+  - Show/hide the say tag (/VIP/, /Mod/ or /Adm/).
+* Say Command: !about  (Administrator)
+  - Shows some information about the script.
+* Censored names.
+  - Prevents unregistered players from using names matching certain patterns.
+* Script version is logged at start up.
+
+Features Changed:
+* Black say colour is now dark grey in order to be more visible on black
+  background.
+* Say Command: !edituser  (Administrator)
+  - Changed to !editname
+* Menu Command: Check/Online Users  (Administrator)
+  - Changed to a say command: !online
+* Menu Commands: Remove/Ban IP/USGN and Remove/Ban Name  (Moderator level 2)
+  - Final "are you really sure" question added.
+
+Bugs Fixed:
+* Auto team balance now decreases the number of deaths by one when team
+  changing a player at round start. This doesn't work if the number of deaths
+  is already zero.
+* Registered users with '|' in their names messed up several menus. This is
+  now solved by replacing the '|' with a '!' in the menus.
