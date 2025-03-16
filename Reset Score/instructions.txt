@@ -1,0 +1,4 @@
+1. Move "reset_score.lua" to "CS2D/sys/lua/hc/modules/reset_score.lua"
+2. Implement "config.txt" inside "CS2D/sys/la/hc/hc.conf"
+	a. Add the "reset_score" to the hc.modules table.
+	b. Add the permission line at the bottom of the file where applicable.

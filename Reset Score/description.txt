@@ -1,0 +1,1 @@
+Adds the "rs" say command that will reset a player's score, assists and deaths upon casting.

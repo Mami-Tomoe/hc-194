@@ -1,0 +1,5 @@
+-- Module name:
+'reset_score'
+
+-- Permissions:
+hc.RESET_SCORE_LEVEL = hc.USER
