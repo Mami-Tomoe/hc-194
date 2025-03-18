@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------
 
 function hc.reset_score.init()
-	hc.add_say_command('rs', hc.moderation.reset_score_command, hc.RESET_SCORE_LEVEL, nil,
+	hc.add_say_command('rs', hc.reset_score.reset_score_command, hc.RESET_SCORE_LEVEL, nil,
 		'Reset your score, deaths and assists.', true)
 end
 
@@ -11,7 +11,7 @@ end
 -- Say commands
 -------------------------------------------------------------------------------
 
-function hc.moderation.reset_score_command(p, arg)
+function hc.reset_score.reset_score_command(p, arg)
 	hc.exec(p, 'setscore ' .. p .. ' 0')
 	hc.exec(p, 'setdeaths ' .. p .. ' 0')
 	hc.exec(p, 'setassists ' .. p .. ' 0')
