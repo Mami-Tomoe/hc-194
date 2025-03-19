@@ -1,0 +1,6 @@
+-- Module name:
+'mvp'
+
+-- Whether to penalise players who commit friendly-fire (or team-kills):
+-- If set to false, friendly-fire/team-kills will be ignored and assumed to be fair-play.
+hc.MVP_FRIENDLY_FIRE_PENALTY = true
