@@ -11,6 +11,22 @@ function hc.teleport.init()
 end
 
 -------------------------------------------------------------------------------
+-- Private API
+-------------------------------------------------------------------------------
+
+local function register_undo(caster, victim)
+	if not hc.undo then
+		return
+	end
+
+	local x, y = player(victim, 'x'), player(victim, 'y')
+
+	hc.undo.register_command(caster, 'Teleport', 'Revert teleporting ' .. player(victim, 'name'), function(p)
+		hc.exec(p, 'setpos ' .. victim .. ' ' .. x .. ' ' .. y)
+	end)
+end
+
+-------------------------------------------------------------------------------
 -- Menu commands
 -------------------------------------------------------------------------------
 
@@ -60,7 +76,10 @@ function hc.teleport.teleport_menu_command(p)
 						and hc.player_exists(to) and player(to, 'health') > 0 then
 						local x, y = player(to, 'x'), player(to, 'y')
 
+						register_undo(p, from)
+
 						hc.exec(p, 'setpos ' .. from .. ' ' .. x .. ' ' .. y)
+
 
 						hc.info(p, 'Teleport success.')
 					else
@@ -102,7 +121,11 @@ function hc.teleport.teleport_say_command(p, arg)
 
 	local x, y = player(pl, 'x'), player(pl, 'y')
 
+	register_undo(p, id)
+
 	hc.exec(p, 'setpos ' .. id .. ' ' .. x .. ' ' .. y)
+
+	hc.info(p, 'Teleport success.')
 
 	return true
 end
