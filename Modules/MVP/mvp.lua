@@ -83,11 +83,29 @@ function hc.mvp.endround_hook(mode)
 end
 
 function hc.mvp.kill_hook(killer, victim, itemType, x, y, obj, assistant)
-	hc.players[killer].mvp.kills = hc.players[killer].mvp.kills + 1
+	local frags = 1
+
+	if hc.MVP_FRIENDLY_FIRE_PENALTY == true then
+		if player(victim, 'team') == player(killer, 'team') then
+			frags = -frags -- Reduce frags (penalty).
+		end
+	end
+
+	hc.players[killer].mvp.kills = hc.players[killer].mvp.kills + frags
 end
 
 function hc.mvp.hit_hook(victim, source, itemType, hpdmg, apdmg, rawdmg, obj)
-	if source > 0 then
-		hc.players[source].mvp.damage = hc.players[source].mvp.damage + hpdmg
+	if source <= 0 then
+		return
 	end
+
+	local dmg = hpdmg
+
+	if hc.MVP_FRIENDLY_FIRE_PENALTY == true then
+		if player(victim, 'team') == player(source, 'team') then
+			dmg = -dmg -- Reduce inflicted damage (penalty).
+		end
+	end
+
+	hc.players[source].mvp.damage = hc.players[source].mvp.damage + dmg
 end
