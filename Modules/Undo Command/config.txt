@@ -1,0 +1,8 @@
+-- Module name:
+'undo'
+
+-- Permissions:
+hc.UNDO_LEVEL	= hc.VIP
+
+-- Limit how many commands can be reverted.
+hc.UNDO_MAX_HISTORY = 3

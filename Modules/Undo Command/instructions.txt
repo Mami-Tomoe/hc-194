@@ -1,0 +1,5 @@
+1. Move "undo.lua" to "CS2D/sys/lua/hc/modules/undo.lua"
+2. Implement "config.txt" inside "CS2D/sys/la/hc/hc.conf"
+	a. Add the "undo" to the hc.modules table.
+	b. Add the permission line at the bottom of the file where applicable.
+	c. Add (and configure) the "hc.UNDO_MAX_HISTORY" where applicable.

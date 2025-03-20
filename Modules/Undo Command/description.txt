@@ -1,0 +1,2 @@
+Adds the "undo" API which allows players to revert actions (either say or menu commands).
+
