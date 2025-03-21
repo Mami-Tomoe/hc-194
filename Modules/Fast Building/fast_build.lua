@@ -33,6 +33,8 @@ local function get_next_level(buildingType)
 		return hc.BUILDINGS.TRIPLE_TURRET
 	elseif buildingType == hc.BUILDINGS.SUPPLY then
 		return hc.BUILDINGS.SUPER_SUPPLY
+	elseif buildingType == hc.BUILDINGS.BARRICADE then
+		return hc.BUILDINGS.WALL_I
 	elseif buildingType == hc.BUILDINGS.WALL_I then
 		return hc.BUILDINGS.WALL_II
 	elseif buildingType == hc.BUILDINGS.WALL_II then
