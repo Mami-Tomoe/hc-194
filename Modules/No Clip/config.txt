@@ -1,0 +1,17 @@
+-- Module name:
+'no_clip'
+
+-- Configuration:
+-- For a list of valid keys, see: https://cs2d.com/help.php?luacat=all&luacmd=addbind#cmd
+hc.NO_CLIP_KEY = 'space'
+
+-- Whether to create a smoke effect where the player teleported from upon teleporting.
+hc.NO_CLIP_EFFECT = true
+
+-- Whether to play sounds on the original and new position.
+-- Can be set to `nil` or `false`.
+-- You may set individual keys to `nil` or `false` to only have "from" or "to" as well.
+hc.NO_CLIP_SFX = { from = 'weapons/g_smoke.wav', to = 'weapons/portalgun.ogg' }
+
+-- Permissions:
+hc.NO_CLIP_LEVEL = hc.ADMINISTRATOR

@@ -1,0 +1,2 @@
+Better known as wall-hack, this module allows to teleport through walls.
+It's outdated as it does not use the player mousex and player mousey variables, but it still works.
