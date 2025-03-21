@@ -26,55 +26,57 @@ hc.MAP_MAX_WIDTH = 1000
 hc.MAP_MAX_HEIGHT = 1000
 
 -- Colours
-hc.SPEC_YELLOW = "©255220000"
-hc.T_RED = "©255025000"
-hc.CT_BLUE = "©050150255"
+hc.SPEC_YELLOW = "\169255220000"
+hc.T_RED = "\169255025000"
+hc.CT_BLUE = "\169050150255"
 
 hc.MAX_OBJECT_HEALTH = 100
 
 -- Building types
-hc.BARRICADE = 1
-hc.BARBED_WIRE = 2
-hc.WALL_I = 3
-hc.WALL_II = 4
-hc.WALL_III = 5
-hc.GATE_FIELD = 6
-hc.DISPENSER = 7
-hc.TURRET = 8
-hc.SUPPLY = 9
-hc.CONSTRUCTION_SITE = 10
-hc.DUAL_TURRET = 11
-hc.TRIPLE_TURRET = 12
-hc.TELEPORTER_ENTRANCE = 13
-hc.TELEPORTER_EXIT = 14
-hc.SUPER_SUPPLY = 15
-hc.MINE = 20
-hc.LASER_MINE = 21
-hc.ORANGE_PORTAL = 22
-hc.BLUE_PORTAL = 23
-hc.IMAGE = 40
+hc.BUILDINGS = {
+	BARRICADE = 1,
+	BARBED_WIRE = 2,
+	WALL_I = 3,
+	WALL_II = 4,
+	WALL_III = 5,
+	GATE_FIELD = 6,
+	DISPENSER = 7,
+	TURRET = 8,
+	SUPPLY = 9,
+	CONSTRUCTION_SITE = 10,
+	DUAL_TURRET = 11,
+	TRIPLE_TURRET = 12,
+	TELEPORTER_ENTRANCE = 13,
+	TELEPORTER_EXIT = 14,
+	SUPER_SUPPLY = 15,
+	MINE = 20,
+	LASER_MINE = 21,
+	ORANGE_PORTAL = 22,
+	BLUE_PORTAL = 23,
+	IMAGE = 40
+}
 
 hc.BUILDING_NAMES = {
-    [hc.BARRICADE] = "Barricade",
-    [hc.BARBED_WIRE] = "Barbed Wire",
-    [hc.WALL_I] = "Wall I",
-    [hc.WALL_II] = "Wall II",
-    [hc.WALL_III] = "Wall III",
-    [hc.GATE_FIELD] = "Gate Field",
-    [hc.DISPENSER] = "Dispenser",
-    [hc.TURRET] = "Turret",
-    [hc.SUPPLY] = "Supply",
-    [hc.CONSTRUCTION_SITE] = "Construction Site",
-    [hc.DUAL_TURRET] = "Dual Turret",
-    [hc.TRIPLE_TURRET] = "Triple Turret",
-    [hc.TELEPORTER_ENTRANCE] = "Teleporter Entrance",
-    [hc.TELEPORTER_EXIT] = "Teleporter Exit",
-    [hc.SUPER_SUPPLY] = "Super Supply",
-    [hc.MINE] = "Mine",
-    [hc.LASER_MINE] = "Laser Mine",
-    [hc.ORANGE_PORTAL] = "Orange Portal",
-    [hc.BLUE_PORTAL] = "Blue Portal",
-    [hc.IMAGE] = "Image"
+	[hc.BUILDINGS.BARRICADE] = "Barricade",
+	[hc.BUILDINGS.BARBED_WIRE] = "Barbed Wire",
+	[hc.BUILDINGS.WALL_I] = "Wall I",
+	[hc.BUILDINGS.WALL_II] = "Wall II",
+	[hc.BUILDINGS.WALL_III] = "Wall III",
+	[hc.BUILDINGS.GATE_FIELD] = "Gate Field",
+	[hc.BUILDINGS.DISPENSER] = "Dispenser",
+	[hc.BUILDINGS.TURRET] = "Turret",
+	[hc.BUILDINGS.SUPPLY] = "Supply",
+	[hc.BUILDINGS.CONSTRUCTION_SITE] = "Construction Site",
+	[hc.BUILDINGS.DUAL_TURRET] = "Dual Turret",
+	[hc.BUILDINGS.TRIPLE_TURRET] = "Triple Turret",
+	[hc.BUILDINGS.TELEPORTER_ENTRANCE] = "Teleporter Entrance",
+	[hc.BUILDINGS.TELEPORTER_EXIT] = "Teleporter Exit",
+	[hc.BUILDINGS.SUPER_SUPPLY] = "Super Supply",
+	[hc.BUILDINGS.MINE] = "Mine",
+	[hc.BUILDINGS.LASER_MINE] = "Laser Mine",
+	[hc.BUILDINGS.ORANGE_PORTAL] = "Orange Portal",
+	[hc.BUILDINGS.BLUE_PORTAL] = "Blue Portal",
+	[hc.BUILDINGS.IMAGE] = "Image"
 }
 
 -- Item types
@@ -205,7 +207,7 @@ hc.SERVERACTION2 = 2
 hc.SERVERACTION3 = 3
 
 hc.DEFAULT_KEYS = {
-    [hc.SERVERACTION1] = "F2",
-    [hc.SERVERACTION2] = "F3",
-    [hc.SERVERACTION3] = "F4"
+	[hc.SERVERACTION1] = "F2",
+	[hc.SERVERACTION2] = "F3",
+	[hc.SERVERACTION3] = "F4"
 }
