@@ -1,0 +1,23 @@
+-- Module name:
+'random_items'
+
+-- Configuration:
+hc.RANDOM_ITEMS_CONFIG = {
+	spawnerItem = 86, -- Gut Bomb
+	chance = 100,
+	defaultItemID = 35, -- AWP
+	weaponTypes = {
+		{
+			id = 84, -- Stealth Suit
+			chance = 30
+		},
+		{
+			id = 45, -- Laser
+			chance = 20
+		},
+		{
+			id = 34, --Scout
+		    chance = 20
+		}
+	}
+}
