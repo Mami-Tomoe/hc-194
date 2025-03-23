@@ -40,20 +40,18 @@ end
 ------------------------------------------------------------------------------
 
 function hc.emojis.check_for_emojis(p, message)
+	local prop = hc.get_player_property(p, EMOJI_PROP_NAME) or '~'
+
 	for k, v in pairs(hc.EMOJIS_CONFIG) do
 		k, v = v.dir, v.str
 
 		if type(v) == 'table' then
-			for a, b in pairs(v) do
-				message = message:gsub(
-					(hc.get_player_property(p, hc.chat.EMOJI_PROP_NAME) or '~') ..
-					b .. (hc.get_player_property(p, hc.chat.EMOJI_PROP_NAME) == ':' and ':' or ''),
+			for _, alt in pairs(v) do
+				message = message:gsub(prop .. alt .. (prop == ':' and ':' or ''),
 					'\174' .. hc.chat.EMOTICON_PATH .. 'chat/' .. k .. '.png')
 			end
 		else
-			message = message:gsub(
-				(hc.get_player_property(p, hc.chat.EMOJI_PROP_NAME) or '~') ..
-				v .. (hc.get_player_property(p, hc.chat.EMOJI_PROP_NAME) == ':' and ':' or ''),
+			message = message:gsub(prop .. v .. (prop == ':' and ':' or ''),
 				'\174' .. hc.chat.EMOTICON_PATH .. 'chat/' .. k .. '.png')
 		end
 	end
@@ -315,8 +313,10 @@ function hc.emojis.emoji_usage_command(p)
 	}
 
 	hc.show_menu(p, 'Emoji Usage', menu,
-		function(p, id, item)
+		function(p, _, item)
 			hc.set_player_property(p, EMOJI_PROP_NAME, item.value)
+
+			hc.info(p, 'Emoji usage preferences saved.')
 		end)
 end
 
