@@ -1,5 +1,5 @@
 1. Move "no_clip.lua" to "CS2D/sys/lua/hc/modules/no_clip.lua"
-2. Implement "config.txt" inside "CS2D/sys/la/hc/hc.conf"
+2. Implement "config.txt" inside "CS2D/sys/lua/hc/hc.conf"
 	a. Add the "no_clip" to the hc.modules table.
 	b. Add the permission line at the bottom of the file where applicable.
 	c. Add (and configure) the "hc.NO_CLIP_KEY" where applicable.
