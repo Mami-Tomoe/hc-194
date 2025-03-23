@@ -1,0 +1,1 @@
+Enables the ability to use emojis in the chat.
