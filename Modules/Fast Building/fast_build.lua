@@ -13,19 +13,6 @@ local function init_player(p)
 	end
 end
 
--- Get the lowest level for a building.
--- That is usually the level the building originated in.
-local function get_lowest_level(buildingType)
-	if buildingType == hc.BUILDINGS.DUAL_TURRET
-		or buildingType == hc.BUILDINGS.TRIPLE_TURRET then
-		return hc.BUILDINGS.TURRET
-	elseif buildingType == hc.BUILDINGS.SUPER_SUPPLY then
-		return hc.BUILDINGS.SUPPLY
-	end
-
-	return buildingType
-end
-
 local function get_next_level(buildingType)
 	if buildingType == hc.BUILDINGS.TURRET then
 		return hc.BUILDINGS.DUAL_TURRET
@@ -72,50 +59,47 @@ function hc.fast_build.buildattempt_hook(p, buildingType, tx, ty, mode)
 
 			return 1
 		end
+	end
 
-		local price = hc.FAST_BUILD_CONFIG[buildingType].price
+	local price = building_config.price
 
-		if price then
-			local money = player(p, 'money')
+	if price then
+		local money = player(p, 'money')
 
-			if price > money then
-				hc.event(p, hc.RED .. 'You have insufficient funds@C')
+		if price > money then
+			hc.event(p, hc.RED .. 'You have insufficient funds@C')
 
-				return 1
-			end
+			return 1
 		end
 	end
 end
 
 function hc.fast_build.build_hook(p, buildingType, tx, ty, mode, obj)
-	local has_limit = players[p][buildingType]
+	local building_config = hc.FAST_BUILD_CONFIG[buildingType]
 
-	if has_limit then
+	if not building_config then
+		return
+	end
+
+	local limit = building_config.limit
+
+	if limit then
 		players[p][buildingType] = players[p][buildingType] + 1
+	end
 
-		local price = hc.FAST_BUILD_CONFIG[buildingType].price
+	local price = building_config.price
 
-		if price then
-			parse('setmoney ' .. p .. ' ' .. player(p, 'money') - price)
-		end
+	if price then
+		parse('setmoney ' .. p .. ' ' .. player(p, 'money') - price)
+	end
 
-		local rot = player(p, 'rot')
-		local ms_time = 0
+	if building_config.instant_build then
+		local rot     = player(p, 'rot')
+		local team    = player(p, 'team')
+		local command = 'spawnobject ' ..
+			buildingType .. ' ' .. tx .. ' ' .. ty .. ' ' .. rot .. ' ' .. mode .. ' ' .. team .. ' ' .. p
 
-		-- Special care for laser mines (incomplete).
-		if buildingType == hc.BUILDINGS.LASER_MINE then
-			rot = (180 - rot) % 360 -- This needs to be fixed.
-			ms_time = 3000
-
-			local x, y = player(p, 'x'), player(p, 'y')
-
-			cs2d_timer(ms_time, 'parse', 'sv_soundpos "weapons/mine_activate.wav" ' .. x .. ' ' .. y)
-		end
-
-		cs2d_timer(ms_time, 'parse',
-			'spawnobject ' ..
-			buildingType ..
-			' ' .. tx .. ' ' .. ty .. ' ' .. rot .. ' ' .. mode .. ' ' .. player(p, 'team') .. ' ' .. p)
+		cs2d_timer(0, 'parse', command)
 
 		return 1
 	end
@@ -125,8 +109,6 @@ function hc.fast_build.objectkill_hook(obj, p)
 	local buildingType = object(obj, 'type')
 
 	if buildingType ~= hc.NPC then
-		buildingType = get_lowest_level(buildingType)
-
 		local id = object(obj, 'player')
 
 		if hc.player_exists(id) then
@@ -138,31 +120,52 @@ function hc.fast_build.objectkill_hook(obj, p)
 end
 
 function hc.fast_build.objectupgrade_hook(obj, p, progress, total)
-	local buildingType = object(obj, 'type')
-	local used = players[p][buildingType]
-	local building_config = hc.FAST_BUILD_CONFIG[buildingType]
+	local building_type = object(obj, 'type')
+	local building_config = hc.FAST_BUILD_CONFIG[building_type]
+	local used = players[p][building_type]
 	local limit = building_config.limit
 
-	if used >= limit then
+	if limit and used >= limit then
 		hc.event(p, hc.RED .. 'You can\'t build more buildings of this type@C')
 
 		return 1
 	end
 
-	if building_config.instant_upgrade then
-		local new_object_type = get_next_level(buildingType)
+	local tick_cost = building_config.upgrade_cost or 100
 
-		if not new_object_type then
-			return
-		end
-
-		local upgrade_cost = ((total - progress) * 100) + 100
+	if not building_config.instant_upgrade then -- Fix the cost.
+		local upgrade_cost = tick_cost - 100
 
 		if upgrade_cost > 0 then
 			local money = player(p, 'money')
 
 			if upgrade_cost > money then
 				hc.event(p, hc.RED .. 'You have insufficient funds@C')
+
+				return 1
+			else
+				parse('setmoney ' .. p .. ' ' .. money - upgrade_cost)
+
+				return 0
+			end
+		end
+	else -- Full cost calculated below.
+		local prev_object_type = building_type
+		local next_object_type = get_next_level(building_type)
+
+		if not next_object_type then
+			return
+		end
+
+		local upgrade_cost = ((total - progress) * tick_cost) + tick_cost
+
+		if upgrade_cost > 0 then
+			local money = player(p, 'money')
+
+			if upgrade_cost > money then
+				hc.event(p, hc.RED .. 'You have insufficient funds@C')
+
+				return 1
 			else
 				parse('setmoney ' .. p .. ' ' .. money - upgrade_cost)
 			end
@@ -175,11 +178,16 @@ function hc.fast_build.objectupgrade_hook(obj, p, progress, total)
 		parse('killobject ' .. obj)
 
 		local cmd = 'spawnobject "' ..
-			new_object_type ..
+			next_object_type ..
 			'" "' ..
 			obj_tx .. '" "' .. obj_ty .. '" "' .. rot .. '" "' .. mode .. '" "' .. player(p, 'team') .. '" "' .. p .. '"'
 
 		cs2d_timer(0, 'parse', cmd)
+
+		if limit then
+			players[p][prev_object_type] = players[p][prev_object_type] - 1
+			players[p][next_object_type] = players[p][next_object_type] + 1
+		end
 
 		return 1
 	end
@@ -200,7 +208,7 @@ end
 function hc.fast_build.init()
 	players = {}
 
-	-- Force new limits
+	-- Force new limits and prices
 	for building_id, building_config in pairs(hc.FAST_BUILD_CONFIG) do
 		parse('mp_building_limit "' .. hc.BUILDING_NAMES[building_id] .. '" "' .. building_config.limit .. '"')
 		parse('mp_building_price "' .. hc.BUILDING_NAMES[building_id] .. '" "' .. building_config.price .. '"')

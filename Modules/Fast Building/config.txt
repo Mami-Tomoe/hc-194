@@ -2,21 +2,26 @@
 'fast_build'
 
 -- Module configuration:
-hc.FAST_BUILD_CONFIG = {
-	[hc.BUILDINGS.BARRICADE] = { limit = 32, price = 300, instant_upgrade = false },
-	[hc.BUILDINGS.BARBED_WIRE] = { limit = 16, price = 500, instant_upgrade = false },
-	[hc.BUILDINGS.WALL_I] = { limit = 64, price = 1000, instant_upgrade = true },
-	[hc.BUILDINGS.WALL_II] = { limit = 48, price = 2000, instant_upgrade = true },
-	[hc.BUILDINGS.WALL_III] = { limit = 32, price = 3000, instant_upgrade = true },
-	[hc.BUILDINGS.GATE_FIELD] = { limit = 32, price = 1500, instant_upgrade = false },
-	[hc.BUILDINGS.DISPENSER] = { limit = 4, price = 5000, instant_upgrade = false },
-	[hc.BUILDINGS.TURRET] = { limit = 6, price = 5000, instant_upgrade = false },
-	[hc.BUILDINGS.SUPPLY] = { limit = 4, price = 5000, instant_upgrade = false },
-	[hc.BUILDINGS.DUAL_TURRET] = { limit = 4, price = 0, instant_upgrade = false },
-	[hc.BUILDINGS.TRIPLE_TURRET] = { limit = 2, price = 0, instant_upgrade = false },
-	[hc.BUILDINGS.TELEPORTER_ENTRANCE] = { limit = 4, price = 3000, instant_upgrade = false },
-	[hc.BUILDINGS.TELEPORTER_EXIT] = { limit = 1, price = 3000, instant_upgrade = false },
-	[hc.BUILDINGS.SUPER_SUPPLY] = { limit = 2, price = 0, instant_upgrade = false },
-	[hc.BUILDINGS.MINE] = { limit = 16, price = 0, instant_upgrade = false },
-	-- [hc.BUILDINGS.LASER_MINE] = { limit = 8, price = 0, instant_upgrade = false } -- Incomplete (broken).
+-- Do not add/remove values, I already set everything you need.
+-- 0 limit means no building.
+-- 0 price means free.
+-- Instant build/upgrade is NOT available for Mines/Laser Mines for obvious reasons.
+-- Upgrade costs affect the cost per hit with a Wrench, not the total cost! Default is $100.
+hc.FAST_BUILD_CONFIG   = {
+	[hc.BUILDINGS.BARRICADE]           = { limit = 32, price = 300, instant_build = true, instant_upgrade = false, upgrade_cost = 100 },
+	[hc.BUILDINGS.BARBED_WIRE]         = { limit = 16, price = 500, instant_build = true },
+	[hc.BUILDINGS.WALL_I]              = { limit = 64, price = 1000, instant_build = true, instant_upgrade = false, upgrade_cost = 100 },
+	[hc.BUILDINGS.WALL_II]             = { limit = 48, price = 2000, instant_build = true, instant_upgrade = false, upgrade_cost = 100 },
+	[hc.BUILDINGS.WALL_III]            = { limit = 32, price = 3000, instant_build = true },
+	[hc.BUILDINGS.GATE_FIELD]          = { limit = 32, price = 1500, instant_build = true },
+	[hc.BUILDINGS.DISPENSER]           = { limit = 4, price = 5000, instant_build = true },
+	[hc.BUILDINGS.TURRET]              = { limit = 6, price = 5000, instant_build = true, instant_upgrade = false, upgrade_cost = 100 },
+	[hc.BUILDINGS.SUPPLY]              = { limit = 4, price = 5000, instant_build = true, instant_upgrade = false, upgrade_cost = 100 },
+	[hc.BUILDINGS.DUAL_TURRET]         = { limit = 4, price = 0, instant_build = true, instant_upgrade = false, upgrade_cost = 100 },
+	[hc.BUILDINGS.TRIPLE_TURRET]       = { limit = 2, price = 0, instant_build = true, instant_upgrade = false, upgrade_cost = 100 },
+	[hc.BUILDINGS.TELEPORTER_ENTRANCE] = { limit = 4, price = 3000, instant_build = true },
+	[hc.BUILDINGS.TELEPORTER_EXIT]     = { limit = 1, price = 3000, instant_build = true },
+	[hc.BUILDINGS.SUPER_SUPPLY]        = { limit = 2, price = 0, instant_build = true },
+	[hc.BUILDINGS.MINE]                = { limit = 12, price = 0 },
+	[hc.BUILDINGS.LASER_MINE]          = { limit = 12, price = 0 }
 }
