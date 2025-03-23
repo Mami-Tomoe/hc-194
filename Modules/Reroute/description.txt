@@ -1,0 +1,1 @@
+Integrates a custom server list inside your server for rerouting players.

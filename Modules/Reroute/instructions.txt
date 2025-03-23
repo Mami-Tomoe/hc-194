@@ -1,0 +1,5 @@
+1. Move "reroute.lua" to "CS2D/sys/lua/hc/modules/reroute.lua"
+2. Implement "config.txt" inside "CS2D/sys/lua/hc/hc.conf"
+	a. Add the "reroute" to the hc.modules table.
+	b. Add the permission line at the bottom of the file where applicable.
+	c. Add (and configure) the "hc.REROUTE_SERVERS" where applicable.
