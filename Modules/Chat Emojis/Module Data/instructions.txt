@@ -4,4 +4,5 @@
 	a. Add the "emojis" to the hc.modules table.
 	b. Add (and configure) the "hc.EMOJI_LIST_LEVEL" where applicable.
 	c. Add (and configure) the "hc.EMOJI_USAGE_LEVEL" where applicable.
+	d. Add (and configure) the "hc.EMOJIS_CONFIG" where applicable.
 4. Implement "sys/lua/servertransfer.txt" inside "CS2D/sys/servertransfer.lst"
