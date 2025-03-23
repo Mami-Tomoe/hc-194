@@ -1,0 +1,7 @@
+1. Move "sys/lua/hc/modules/emojis.lua" to "CS2D/sys/lua/hc/modules/emojis.lua"
+2. Move "gfx/hc/*.*" to "CS2D/gfx/hc/*.*"
+3. Implement "sys/lua/hc/config.txt" inside "CS2D/sys/lua/hc/hc.conf"
+	a. Add the "emojis" to the hc.modules table.
+	b. Add (and configure) the "hc.EMOJI_LIST_LEVEL" where applicable.
+	c. Add (and configure) the "hc.EMOJI_USAGE_LEVEL" where applicable.
+4. Implement "sys/lua/servertransfer.txt" inside "CS2D/sys/servertransfer.lst"

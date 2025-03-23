@@ -1,0 +1,47 @@
+-- Module name:
+'emojis'
+
+-- Permissions:
+hc.EMOJI_LIST_LEVEL = hc.USER
+hc.EMOJI_USAGE_LEVEL = hc.USER
+
+-- Configuration:
+hc.EMOJIS_CONFIG = {
+	-- Custom emojis, will show in the emoji helper.
+	{ name = 'AsheGasm',               dir = 'custom/ashe_gasm',   str = '[Aa][Ss][Hh][Ee][Gg][Aa][Ss][Mm]' },
+	{ name = 'AsheHug',                dir = 'custom/ashe_hug',    str = '[Aa][Ss][Hh][Ee][Hh][Uu][Gg]' },
+	{ name = 'Crab',                   dir = 'custom/crab',        str = '[Cc][Rr][Aa][Bb]' },
+	{ name = 'CrossCode',              dir = 'custom/crosscode',   str = '[Cc][Rr][Oo][Ss][Ss][Cc][Oo][Dd][Ee]' },
+	{ name = 'Worry',                  dir = 'custom/worry',       str = '[Ww][Oo][Rr][Rr][Yy]' },
+	{ name = 'Poke',                   dir = 'custom/sp',          str = '[Pp][Oo][Kk][Ee]' },
+	{ name = 'LeaveServer',            dir = 'custom/leave',       str = '[Ll][Ee][Aa][Vv][Ee][Ss][Ee][Rr][Vv][Ee][Rr]' },
+	{ name = 'Lenny',                  dir = 'custom/lenny',       str = '[Ll][Ee][Nn][Nn][Yy]' },
+	{ name = 'HatsOff',                dir = 'custom/hats_off',    str = '[Hh][Aa][Tt][Ss][Oo][Ff][Ff]' },
+	{ name = 'DabPenguin',             dir = 'custom/dabpenguin',  str = '[Dd][Aa][Bb][Pp][Ee][Nn][Gg][Uu][Ii][Nn]' },
+	{ name = 'DabPepe',                dir = 'custom/dabpepe',     str = '[Dd][Aa][Bb][Pp][Ee][Pp][Ee]' },
+	{ name = { 'FeelsBadMan', 'fbm' }, dir = 'custom/feelsbadman', str = { '[Ff][Ee][Ee][Ll][Ss][Bb][Aa][Dd][Mm][Aa][Nn]', '[Ff][Bb][Mm]' } },
+	{ name = 'MonkaS',                 dir = 'custom/monkas',      str = '[Mm][Oo][Nn][Kk][Aa][Ss]' },
+	{ name = 'Gasp',                   dir = 'custom/gasp',        str = '[Gg][Aa][Ss][Pp]' },
+	{ name = 'Hehe',                   dir = 'custom/hehe',        str = '[Hh][Ee][Hh][Ee]' },
+	{ name = 'HyperAngry',             dir = 'custom/hyperangry',  str = '[Hh][Yy][Pp][Ee][Rr][Aa][Nn][Gg][Rr][Yy]' },
+	{ name = 'OMEGALUL',               dir = 'custom/omegalul',    str = '[Oo][Mm][Ee][Gg][Aa][Ll][Uu][Ll]' },
+	{ name = 'LUL',                    dir = 'custom/lul',         str = '[Ll][Uu][Ll]' },
+	{ name = 'Wat',                    dir = 'custom/wat',         str = '[Ww][Aa][Tt]' },
+	{ name = 'WhatBro',                dir = 'custom/what_bro',    str = '[Ww][Hh][Aa][Tt][Bb][Rr][Oo]' },
+	{ name = 'WhatMe',                 dir = 'custom/what_me',     str = '[Ww][Hh][Aa][Tt][Mm][Ee]' },
+
+	-- Default HC emoticons, can be used but won't show in the emoji helper.
+	{ name = { '>:)', '>:D' },         dir = 'evil',               str = { '>:%)', '>:[Dd]' } },
+	{ name = '>:(',                    dir = 'angry',              str = '>:%(' },
+	{ name = ':)',                     dir = 'smiling',            str = ':%)' },
+	{ name = ':D',                     dir = 'smiling_big',        str = ':[Dd]' },
+	{ name = ':(',                     dir = 'frowning',           str = ':%("' },
+	{ name = ';)',                     dir = 'winking',            str = ';%)' },
+	{ name = 'XD',                     dir = 'laughing',           str = '[Xx][Dd]' },
+	{ name = ':P',                     dir = 'cheeky',             str = ':[Pp]' },
+	{ name = { ';(', 'DX' },           dir = 'crying',             str = { ';%(', '[Dd][Xx]' } },
+	{ name = { ':O', ':0' },           dir = 'surprised',          str = { ':[Oo]', ':0' } },
+	{ name = ':/',                     dir = 'skeptical',          str = ':/' },
+	{ name = ':S',                     dir = 'uneasy',             str = ':[Ss]' },
+	{ name = '<3',                     dir = 'heart',              str = '<3' }
+}
