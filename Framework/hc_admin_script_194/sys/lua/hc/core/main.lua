@@ -188,6 +188,7 @@ end
 ---@param callback_cancel? function Function that receives the following when a the `Cancel`/`X` button is pressed:
 ---> * `p`: Player identifier.
 ---> * `id`: Button identifier.
+---@param wide? boolean Whether the menu should appear wide or not, defaults to `false`.
 function hc.show_menu(p, title, ids, callback, callback_cancel, wide)
 	local start
 
@@ -259,30 +260,17 @@ function hc.show_menu(p, title, ids, callback, callback_cancel, wide)
 	end
 
 	hc.players[p].main.menu_callback = callback
-	hc.players[p].main.menu_callback_cancel = callback_cancel
-	hc.players[p].main.menu_callback_cancel = callback_cancel and
-	    function(...)
-		    local args = { ... }
 
-		    hc.timer.create(0, function(_)
-			    callback_cancel(unpack(args))
-		    end, 1, {
-			    {
-				    ['trigger'] = {
-					    type = 'hook',
-					    func = 'leave'
-				    },
-				    ['params'] = { p }
-			    },
-			    {
-				    ['trigger'] = {
-					    type = 'hook',
-					    func = 'die'
-				    },
-				    ['params'] = { p }
-			    }
-		    })
-	    end
+	if callback_cancel then
+		hc.players[p].main.menu_callback_cancel = function(...)
+			local args = { ... }
+			local id = args[1]
+
+			timer(0, 'hc.main.callback_cancel', tostring(id), 1)
+		end
+
+		hc.players[p].main.menu_callback_cancel_cb = callback_cancel
+	end
 
 	menu(p, hcmenu)
 end
@@ -650,3 +638,13 @@ end
 
 --function hc.main.remove_hook(mode)
 --end
+
+------------------------------------------------------------------------------
+-- Timer callback
+------------------------------------------------------------------------------
+
+function hc.main.callback_cancel(p)
+	p = tonumber(p)
+
+	hc.players[p].main.menu_callback_cancel_cb(p)
+end

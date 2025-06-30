@@ -8,10 +8,10 @@ function hc.timer.init()
 	hc.timer.timers = {}
 
 	cs2d_timer = timer
-	timer = hc.timer.timer
+	-- timer = hc.timer.timer
 
 	cs2d_freetimer = freetimer
-	freetimer = hc.timer.free_timer
+	-- freetimer = hc.timer.free_timer
 	addhook("second", "hc.timer.timer_hook")
 end
 
@@ -49,10 +49,14 @@ end
 -- CS2D function replacements
 ------------------------------------------------------------------------------
 
+---This function is deprecated and may be removed in a future release.
+---@deprecated
 function hc.timer.timer(time, func, p, c)
 	hc.timer.insert_timer({ time = time, func = func, p = p, c = c })
 end
 
+---This function is deprecated and may be removed in a future release.
+---@deprecated
 function hc.timer.free_timer(func, p)
 	for id, timer in ipairs(hc.timer.timers) do
 		if timer.func == func and p == nil or timer.p == p then
