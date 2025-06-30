@@ -99,7 +99,7 @@ function hc.fast_build.build_hook(p, buildingType, tx, ty, mode, obj)
 		local command = 'spawnobject ' ..
 			buildingType .. ' ' .. tx .. ' ' .. ty .. ' ' .. rot .. ' ' .. mode .. ' ' .. team .. ' ' .. p
 
-		cs2d_timer(0, 'parse', command)
+		timer(0, 'parse', command)
 
 		return 1
 	end
@@ -182,7 +182,7 @@ function hc.fast_build.objectupgrade_hook(obj, p, progress, total)
 			'" "' ..
 			obj_tx .. '" "' .. obj_ty .. '" "' .. rot .. '" "' .. mode .. '" "' .. player(p, 'team') .. '" "' .. p .. '"'
 
-		cs2d_timer(0, 'parse', cmd)
+		timer(0, 'parse', cmd)
 
 		if limit then
 			players[p][prev_object_type] = players[p][prev_object_type] - 1
