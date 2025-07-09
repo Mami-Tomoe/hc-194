@@ -1,3 +1,7 @@
+------------------------------------------------------------------------------
+-- Module API
+------------------------------------------------------------------------------
+
 local emoji_list_tbl = {}
 local HUD_TEXT_IDS = { 6, 7 }
 local EMOJI_PROP_NAME = 'emoji_char'
@@ -7,17 +11,14 @@ local EMOJI_LIST_BUTTON_COORDS = {
 	[6] = { x = { 530, 550 }, y = { 180, 195 } },
 }
 
-
-------------------------------------------------------------------------------
--- Module API
-------------------------------------------------------------------------------
-
 function hc.emojis.init()
+	-- Menu commands.
 	hc.add_menu_command('Emoji List', hc.emojis.emoji_list_command, hc.EMOJI_LIST_LEVEL, hc.COMMAND_MENU_KEY,
 		{ category = 'Help' })
 	hc.add_menu_command('Emoji Usage', hc.emojis.emoji_usage_command, hc.EMOJI_USAGE_LEVEL, hc.COMMAND_MENU_KEY,
 		{ category = 'Config' })
 
+	-- Hooks.
 	addhook('attack', 'hc.emojis.attack_hook', 999999)
 	addhook('clientdata', 'hc.emojis.clientdata_hook', 999999)
 	addhook('ms100', 'hc.emojis.ms100_hook')
@@ -26,6 +27,7 @@ function hc.emojis.init()
 	addhook('key', 'hc.emojis.key_hook')
 	addhook('init', 'hc.emojis.init_hook')
 
+	-- Binds.
 	addbind('mwheelup')
 	addbind('mwheeldown')
 	addbind('mouse3')
@@ -63,7 +65,7 @@ function hc.emojis.say_cb(p, text, team_chat)
 	local title = player(p, 'name')
 	local gamemode = tonumber(game('sv_gamemode'))
 	local team = player(p, 'team')
-	local dead = player(p, "health") == 0
+	local dead = player(p, 'health') == 0
 
 	-- Colour based on team (unless death-match).
 	-- Spectators always override this.
@@ -90,13 +92,23 @@ function hc.emojis.say_cb(p, text, team_chat)
 		text = title .. team_chat_string .. ': ' .. text
 	end
 
-	-- Show to team members only.
+	-- Only show to dead players?
 	-- If dead on standard game mode.
-	-- Or team chat.
-	if (gamemode == hc.NORMAL and dead) or team_chat then
+	local dead_only = gamemode == hc.NORMAL and dead
+
+	-- If at least one of the conditions is met,
+	-- then we can't send the message to everyone.
+	if dead_only or team_chat then
 		for id = 1, hc.SLOTS do
-			if hc.player_exists(id) and team == player(id, 'team') then
-				msg2(id, text)
+			-- Player exists.
+			if hc.player_exists(id) then
+				-- Either not team chat, or same team.
+				if not team_chat or (team == player(id, 'team')) then
+					-- Either not dead only, or also dead.
+					if not dead_only or (player(id, 'health') <= 0) then
+						msg2(id, text)
+					end
+				end
 			end
 		end
 
@@ -112,7 +124,7 @@ end
 ------------------------------------------------------------------------------
 
 function hc.emojis.serveraction_hook(p, action)
-	if hc.players[p] and hc.players[p].previewpage then
+	if hc.players[p] and hc.players[p].preview_page_id then
 		hc.emojis.emoji_list_close(p)
 	end
 end
@@ -123,7 +135,7 @@ function hc.emojis.attack_hook(p)
 
 		for k, v in pairs(EMOJI_LIST_BUTTON_COORDS) do
 			if x >= v.x[1] and x <= v.x[2] and y >= v.y[1] and y <= v.y[2] then
-				local page, maxpage = hc.players[p].previewpage or 1, #emoji_list_tbl
+				local page, maxpage = hc.players[p].preview_page_id or 1, #emoji_list_tbl
 
 				if k == 4 then
 					page = page - 1
@@ -137,7 +149,7 @@ function hc.emojis.attack_hook(p)
 
 				if page > maxpage then page = maxpage elseif page < 1 then page = 1 end
 
-				hc.players[p].previewpage = page
+				hc.players[p].preview_page_id = page
 				hc.emojis.emoji_list_select(p, page)
 
 				return
@@ -207,13 +219,13 @@ end
 function hc.emojis.die_hook(p)
 	if hc.players[p].preview then
 		hc.emojis.emoji_list_delay(p)
-		hc.players[p].previewpage = nil
+		hc.players[p].preview_page_id = nil
 	end
 end
 
 function hc.emojis.key_hook(p, key, state)
-	if hc.players[p] and hc.players[p].previewpage then
-		local page, maxpage = hc.players[p].previewpage or 1, #emoji_list_tbl
+	if hc.players[p] and hc.players[p].preview_page_id then
+		local page, maxpage = hc.players[p].preview_page_id or 1, #emoji_list_tbl
 
 		if key == 'mwheeldown' then
 			page = page - 1
@@ -226,7 +238,7 @@ function hc.emojis.key_hook(p, key, state)
 
 		if page > maxpage then page = maxpage elseif page < 1 then page = 1 end
 
-		hc.players[p].previewpage = page
+		hc.players[p].preview_page_id = page
 		hc.emojis.emoji_list_select(p, page)
 	end
 end
@@ -262,7 +274,7 @@ function hc.emojis.say_hook(...)
 	text = hc.emojis.check_for_emojis(p, text)
 
 	-- Get return value.
-	local value = hc.main.call_hook("say", false, p, text)
+	local value = hc.main.call_hook('say', false, p, text)
 
 	-- If value is not 1, then we must print a custom message.
 	if value == 1 then
@@ -281,7 +293,7 @@ function hc.emojis.sayteam_hook(...)
 	text = hc.emojis.check_for_emojis(p, text)
 
 	-- Get return value.
-	local value = hc.main.call_hook("say", false, p, text)
+	local value = hc.main.call_hook('say', false, p, text)
 
 	-- If value is not 1, then we must print a custom message.
 	if value == 1 then
@@ -322,10 +334,10 @@ end
 
 function hc.emojis.emoji_list_command(p)
 	if player(p, 'health') > 0 then
-		hc.players[p].previewpage = 1
+		hc.players[p].preview_page_id = 1
 		hc.emojis.emoji_list_select(p, 1)
 
-		hc.players[p].previewwpn = player(p, 'weapon')
+		hc.players[p].preview_wpn_type_id = player(p, 'weapon')
 		parse('setweapon ' .. p .. ' 50')
 
 		hc.info(p, '[Mouse Wheel Up] -> Next Emoji.')
@@ -371,6 +383,7 @@ end
 
 function hc.emojis.emoji_list_delay(p)
 	p = tonumber(p)
+
 	local time = 250
 
 	parse('hudtxtalphafade ' .. p .. ' ' .. HUD_TEXT_IDS[1] .. ' ' .. time .. ' 0')
@@ -381,6 +394,7 @@ function hc.emojis.emoji_list_delay(p)
 	tween_alpha(hc.players[p].preview[4], time, 0)
 	tween_alpha(hc.players[p].preview[5], time, 0)
 	tween_alpha(hc.players[p].preview[6], time, 0)
+
 	timer(time, 'freeimage', hc.players[p].preview[1])
 	timer(time, 'freeimage', hc.players[p].preview[2])
 	timer(time, 'freeimage', hc.players[p].preview[4])
@@ -392,8 +406,10 @@ end
 
 function hc.emojis.emoji_list_close(p)
 	hc.emojis.emoji_list_delay(p)
-	hc.players[p].previewpage = nil
 
-	parse('setweapon ' .. p .. ' ' .. hc.players[p].previewwpn)
-	hc.players[p].previewwpn = nil
+	hc.players[p].preview_page_id = nil
+
+	parse('setweapon ' .. p .. ' ' .. hc.players[p].preview_wpn_type_id)
+
+	hc.players[p].preview_wpn_type_id = nil
 end
