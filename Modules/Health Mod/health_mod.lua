@@ -47,9 +47,11 @@ local math_sin = math.sin                                       -- Do not touch.
 local math_sqrt = math.sqrt                                     -- Do not touch.
 local math_floor = math.floor                                   -- Do not touch.
 
----There is one limitation about this mod.
----You cannot be "one-shot", as CS2D only sends the damage taken
----in the hit hook and not the incoming damage.
+---There is one limitation about this mod:
+---You cannot be "one-shot" if your custom health is set to anything higher than 250.
+---
+---The technical explanation is that CS2D only sends the damage taken in the
+---hit hook and not the incoming damage.
 ---
 ---This means if a player has 250 HP (CS2D max), and you shoot at them with a weapon
 ---like a laser, that usually deals 1000 damage, the hit hook will only display the rawDmg
