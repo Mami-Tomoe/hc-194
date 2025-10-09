@@ -38,6 +38,8 @@ local parse_lock = true                                         -- Do not touch 
 local kill_info                                                 -- Do not touch.
 
 local PLAYER_CORE = 20                                          -- Do not touch.
+local ZOMBIE_SPRAY_RECOVER = 20                                 -- Do not touch.
+local DISPENSER_RANGE = 36                                      -- Do not touch.
 
 local math_atan2 = math.atan2                                   -- Do not touch.
 local math_cos = math.cos                                       -- Do not touch.
@@ -86,6 +88,7 @@ function hc.health_mod.init()
 	addhook('specswitch', 'hc.health_mod.specswitch_hook', -999999)
 	addhook('frame', 'hc.health_mod.frame_hook')
 	addhook('second', 'hc.health_mod.second_hook')
+	addhook('spray', 'hc.health_mod.spray_hook')
 end
 
 ------------------------------------------------------------------------------
@@ -96,10 +99,20 @@ local function print_error(message)
 	print(('%sError: %s'):format(hc.RED, message))
 end
 
-local function get_weapon_name_and_image_path(wpnTypeId)
+local function get_weapon_name_and_image_path(wpnTypeId, objId)
 	local wpnName = itemtype(wpnTypeId, 'name')
 
-	return ('%s,gfx/weapons/%s_k.bmp'):format(wpnName, wpnName)
+	-- Died to weapon.
+	if wpnName then
+		return ('%s,gfx/weapons/%s_k.bmp'):format(wpnName, wpnName)
+	end
+
+	-- Died to object.
+	if objId > 0 then
+		return object(objId, 'typename')
+	end
+
+	return ''
 end
 
 local function read_command(text)
@@ -504,11 +517,15 @@ function hc.health_mod.die_hook(victim, killer, wpnTypeId, x, y, objId)
 end
 
 function hc.health_mod.hit_hook(victim, source, wpnTypeId, hpDmg, apDmg, rawDmg, objId)
+	if hpDmg <= 0 then
+		return 1
+	end
+
 	local new_health = get_health(victim) - hpDmg
 	local x, y = player(victim, 'x'), player(victim, 'y')
 
 	if new_health <= 0 then
-		local weapon_name_and_image_path = get_weapon_name_and_image_path(wpnTypeId)
+		local weapon_name_and_image_path = get_weapon_name_and_image_path(wpnTypeId, objId)
 
 		-- set_health is called on the die_hook, so no need to call it here.
 		parse(('customkill "%d" "%s" "%d"'):format(source, weapon_name_and_image_path, victim))
@@ -637,12 +654,84 @@ end
 function hc.health_mod.second_hook()
 	local players = player(0, 'tableliving')
 
+	local isZombies = tonumber(game('sv_gamemode')) == hc.ZOMBIES
+	local zombieHeal = tonumber(game('mp_zombierecover'))
+
+	local dispenserHeal = tonumber(game('mp_dispenser_health'))
+
 	for i = 1, #players do
 		local id = players[i]
+		local curHealth = get_health(id)
+		local toHeal = 0
 
-		-- Heal 10 HP/s for medic armour wearers.
-		if get_health(id) < get_max_health(id) and player(id, 'armor') == 204 then
-			set_health(id, get_health(id) + 10)
+		if curHealth < get_max_health(id) then
+			-- Heal 10 HP/s for medic armour wearers.
+			if player(id, 'armor') == 204 then
+				toHeal = toHeal + 10
+			end
+
+			-- Heal zombies.
+			if isZombies and player(id, 'team') == hc.T then
+				toHeal = toHeal + zombieHeal
+			end
+
+			-- Heal from dispenser.
+			if dispenserHeal > 0 then
+				local x, y = player(id, 'x'), player(id, 'y')
+				local nearbyDispensers = closeobjects(x, y, DISPENSER_RANGE, hc.BUILDINGS.DISPENSER)
+				local nearbyDispensersC = #nearbyDispensers
+
+				if nearbyDispensersC > 0 then
+					local playerTeam = player(id, 'team')
+
+					for j = 1, nearbyDispensersC do
+						local dispenser = nearbyDispensers[j]
+
+						if object(dispenser, 'team') == playerTeam then
+							toHeal = toHeal + dispenserHeal
+
+							-- We don't break here because more dispensers = more heal.
+						end
+					end
+				end
+			end
+
+			-- Heal from entities.
+			local entities = entitylist(hc.ENV_HURT)
+			local tx, ty = player(id, 'tilex'), player(id, 'tiley')
+
+			for _, e in pairs(entities) do
+				local entityTx, entityTy = e.x, e.y
+				local entityWidth, entityHeight = entity(entityTx, entityTy, 'int2'), entity(entityTx, entityTy, 'int3')
+
+				if is_inside_rect(tx, ty, entityTx, entityTy, entityTx + entityWidth, entityTy + entityHeight) then
+					local amount = -entity(entityTx, entityTy, 'int0') -- Negative health is heal in a hurt entity.
+
+					-- Only care if the amount is more than 0.
+					-- Hurt is processed individually by the game calling the hit hook.
+					if amount > 0 then
+						toHeal = toHeal - entity(entityTx, entityTy, 'int0')
+					end
+				end
+			end
+
+			if toHeal > 0 then
+				set_health(id, curHealth + toHeal)
+			end
 		end
+	end
+end
+
+function hc.health_mod.spray_hook(p)
+	if tonumber(game('sv_gamemode')) ~= hc.ZOMBIES then
+		return
+	elseif player(p, 'team') ~= hc.T then
+		return
+	end
+
+	local curHealth = get_health(p)
+
+	if curHealth < get_max_health(p) then
+		set_health(p, curHealth + ZOMBIE_SPRAY_RECOVER)
 	end
 end
