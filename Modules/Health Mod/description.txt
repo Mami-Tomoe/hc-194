@@ -1,0 +1,12 @@
+Allows changing the max health set by CS2D from 250 to anything you configure.
+
+The configuration is a little bit complicated which is why it is integrated into the module file itself.
+
+Change the local MAX_DIGITS to whatever you wish (module default is 3).
+Example: 1 digit means 9 max health, 2 digits would be 99, 3 digits would be 999 and so on.
+
+You may also configure other things like the HUDTXT id (for spectating) or various colours.
+
+Avoid changing positions/margins/scales of things, they are relatively hard coded.
+
+3 digits is best for compatibility as more digits would take too much space on anything below 1920x1080.
