@@ -81,6 +81,7 @@ function hc.health_mod.init()
 
 	-- Hooks.
 	addhook('init_player', 'hc.health_mod.init_player_hook', -999999)
+	addhook('delete_player', 'hc.health_mod.delete_player_hook', -999999)
 	addhook('spawn', 'hc.health_mod.spawn_hook', -999999)
 	addhook('die', 'hc.health_mod.die_hook', -999999)
 	addhook('hit', 'hc.health_mod.hit_hook', -999999)
@@ -128,9 +129,11 @@ local function read_command(text)
 		local rest = text:sub(i)
 
 		-- skip leading spaces
-		local s_space, e_space = rest:find('^%s+')
-		if s_space then
-			i = i + e_space
+		local sSpace, eSpace = rest:find('^%s+')
+
+		if sSpace then
+			i = i + eSpace
+
 			rest = text:sub(i)
 		end
 
@@ -141,6 +144,7 @@ local function read_command(text)
 
 		if sd then
 			table.insert(words, capd)
+
 			i = i + ed
 		else
 			-- single-quoted token
@@ -148,6 +152,7 @@ local function read_command(text)
 
 			if ss then
 				table.insert(words, caps)
+
 				i = i + es
 			else
 				-- unquoted token (sequence of non-space chars)
@@ -155,6 +160,7 @@ local function read_command(text)
 
 				if su then
 					table.insert(words, rest:sub(su, eu))
+
 					i = i + eu
 				else
 					break
@@ -170,14 +176,14 @@ end
 
 ---Returns a colour based on given health.
 ---@param health number
----@param as_string boolean
+---@param asString boolean
 ---@return table|string
-local function get_colour_based_on_health(health, as_string)
+local function get_colour_based_on_health(health, asString)
 	if health <= 30 then
-		return (as_string and HUD_COLOUR_STRING.critical) or HUD_COLOUR.critical
+		return (asString and HUD_COLOUR_STRING.critical) or HUD_COLOUR.critical
 	end
 
-	return (as_string and HUD_COLOUR_STRING.default) or HUD_COLOUR.default
+	return (asString and HUD_COLOUR_STRING.default) or HUD_COLOUR.default
 end
 
 local function clamp_max_allowed(amount)
@@ -260,11 +266,11 @@ local function update_spec_hudtxt(p)
 	local text
 
 	if target then
-		local target_health = get_health(target)
+		local targetHealth = get_health(target)
 
 		text = ('%sHealth: %s%d%s/%s%d'):format(
 			SPEC_HUDTXT.colour,
-			get_colour_based_on_health(target_health, true), target_health,
+			get_colour_based_on_health(targetHealth, true), targetHealth,
 			SPEC_HUDTXT.colour,
 			HUD_COLOUR_STRING.default, get_max_health(target))
 	else
@@ -276,15 +282,15 @@ local function update_spec_hudtxt(p)
 end
 
 local function free_spec(p)
-	local old_target = hc.players[p].health_mod.spectating
+	local oldTarget = hc.players[p].health_mod.spectating
 
-	if old_target then
+	if oldTarget then
 		-- Remove old spectating.
-		local old_target_specs = hc.players[old_target].health_mod.spectators
-		local index = hc.find_in_table(old_target_specs, p)
+		local oldTargetSpecs = hc.players[oldTarget].health_mod.spectators
+		local index = hc.find_in_table(oldTargetSpecs, p)
 
 		if index ~= 0 then
-			table.remove(old_target_specs, index)
+			table.remove(oldTargetSpecs, index)
 		end
 
 		hc.players[p].health_mod.spectating = nil
@@ -309,9 +315,9 @@ local function update_spectators(p)
 	local specs = hc.players[p].health_mod.spectators
 
 	for i = 1, #specs do
-		local spectator = specs[i]
+		local specId = specs[i]
 
-		update_spec_hudtxt(spectator)
+		update_spec_hudtxt(specId)
 	end
 end
 
@@ -338,21 +344,21 @@ local function set_health(p, health)
 	update_spectators(p)
 end
 
-local function set_max_health(p, max_health)
-	max_health = max_health or 1
+local function set_max_health(p, maxHealth)
+	maxHealth = maxHealth or 1
 
 	if not hc.player_exists(p) then
 		return print_error(('Player "%s" does not exist.'):format(p))
 	end
 
 	-- Clamp to max allowed.
-	max_health = clamp_max_allowed(max_health)
+	maxHealth = clamp_max_allowed(maxHealth)
 
-	hc.players[p].health_mod.max_health = max_health
+	hc.players[p].health_mod.max_health = maxHealth
 
 	-- Draw images.
-	draw_health_images(p, max_health)
-	draw_health_symbol(p, max_health)
+	draw_health_images(p, maxHealth)
+	draw_health_symbol(p, maxHealth)
 
 	-- Update spectators.
 	update_spectators(p)
@@ -363,20 +369,20 @@ local function show_kill_info(victim, killer)
 		return
 	end
 
-	local armour_line
-	local killer_armour = player(killer, 'armor')
+	local armourText
+	local killerAp = player(killer, 'armor')
 
-	if killer_armour > 0 and killer_armour <= 200 then
-		armour_line = (' %s& %s%d Armor'):format(hc.SPEC_YELLOW, hc.LIME, killer_armour)
+	if killerAp > 0 and killerAp <= 200 then
+		armourText = (' %s& %s%d Armor'):format(hc.SPEC_YELLOW, hc.LIME, killerAp)
 	else
-		armour_line = ''
+		armourText = ''
 	end
 
 	hc.event(victim, {
 		('%sKilled by %s'):format(
 			hc.RED, player(killer, 'name')),
 		('%sEnemy has %s%d HP%s%s left'):format(
-			hc.SPEC_YELLOW, hc.LIME, get_health(killer), armour_line, hc.SPEC_YELLOW)
+			hc.SPEC_YELLOW, hc.LIME, get_health(killer), armourText, hc.SPEC_YELLOW)
 	})
 end
 
@@ -384,7 +390,7 @@ local function is_inside_rect(x, y, x1, y1, x2, y2)
 	return x >= x1 and x <= x2 and y >= y1 and y <= y2
 end
 
-local function raycast_wall(source_x, source_y, impact_x, impact_y, includes_obstacles)
+local function raycast_wall(sourceX, sourceY, impactX, impactY, includesObstacles)
 	local function is_tile_wall(tx, ty)
 		local tile_get = tile
 
@@ -392,33 +398,33 @@ local function raycast_wall(source_x, source_y, impact_x, impact_y, includes_obs
 			return true
 		end
 
-		if includes_obstacles and tile_get(tx, ty, 'obstacle') then
+		if includesObstacles and tile_get(tx, ty, 'obstacle') then
 			return true
 		end
 
 		return false
 	end
 
-	local rot       = math_atan2(impact_y - source_y, impact_x - source_x)
-	local cos_rot   = math_cos(rot)
-	local sin_rot   = math_sin(rot)
+	local rot      = math_atan2(impactY - sourceY, impactX - sourceX)
+	local cosRot   = math_cos(rot)
+	local sinRot   = math_sin(rot)
 
-	impact_x        = impact_x - cos_rot
-	impact_y        = impact_y - sin_rot
+	impactX        = impactX - cosRot
+	impactY        = impactY - sinRot
 
 	-- Localising.
-	local tile_size = hc.TILE_SIZE
+	local tileSize = hc.TILE_SIZE
 
 	-- Distance.
-	local xd        = source_x - impact_x
-	local yd        = source_y - impact_y
-	local dist      = math_sqrt(xd * xd + yd * yd)
+	local xd       = sourceX - impactX
+	local yd       = sourceY - impactY
+	local dist     = math_sqrt(xd * xd + yd * yd)
 
 	for _ = 0, dist, 1 do
-		impact_x = impact_x - cos_rot
-		impact_y = impact_y - sin_rot
+		impactX = impactX - cosRot
+		impactY = impactY - sinRot
 
-		local tx, ty = math_floor(impact_x / tile_size), math_floor(impact_y / tile_size)
+		local tx, ty = math_floor(impactX / tileSize), math_floor(impactY / tileSize)
 
 		if is_tile_wall(tx, ty) then
 			return { tx, ty }
@@ -428,23 +434,23 @@ local function raycast_wall(source_x, source_y, impact_x, impact_y, includes_obs
 	return false
 end
 
-local function can_be_seen(looker_id, looked_id)
+local function can_be_seen(lookerId, lookedId)
 	-- Game mode check.
 	if tonumber(game('sv_gamemode')) == hc.DEATHMATCH then
 		return false
 	end
 
 	-- Same team check.
-	if player(looker_id, 'team') ~= player(looked_id, 'team') then
+	if player(lookerId, 'team') ~= player(lookedId, 'team') then
 		return false
 	end
 
 	-- Raycast check.
 	if tonumber(game('sv_fow')) > 0 then
-		local looker_x, looker_y = player(looker_id, 'x'), player(looker_id, 'y')
-		local looked_x, looked_y = player(looked_id, 'x'), player(looked_id, 'y')
+		local lookerX, lookerY = player(lookerId, 'x'), player(lookerId, 'y')
+		local lookedX, lookedY = player(lookedId, 'x'), player(lookedId, 'y')
 
-		if raycast_wall(looker_x, looker_y, looked_x, looked_y, false) then
+		if raycast_wall(lookerX, lookerY, lookedX, lookedY, false) then
 			return false
 		end
 	end
@@ -495,6 +501,10 @@ function hc.health_mod.init_player_hook(p, reason)
 	}
 end
 
+function hc.health_mod.delete_player_hook(p, reason)
+	free_spec(p)
+end
+
 function hc.health_mod.spawn_hook(p)
 	-- This makes it so core health is set to 250 (max)
 	-- to allow maximum incoming damage per hit.
@@ -523,10 +533,10 @@ function hc.health_mod.hit_hook(victim, source, wpnTypeId, hpDmg, apDmg, rawDmg,
 		return 1
 	end
 
-	local new_health = get_health(victim) - hpDmg
+	local newHealth = get_health(victim) - hpDmg
 	local x, y = player(victim, 'x'), player(victim, 'y')
 
-	if new_health <= 0 then
+	if newHealth <= 0 then
 		local weapon_name_and_image_path = get_weapon_name_and_image_path(wpnTypeId, objId)
 
 		-- set_health is called on the die_hook, so no need to call it here.
@@ -535,7 +545,7 @@ function hc.health_mod.hit_hook(victim, source, wpnTypeId, hpDmg, apDmg, rawDmg,
 		-- Play die sound.
 		parse(('sv_soundpos "%s" "%d" "%d"'):format(('player/die%d.wav'):format(math.random(3)), x, y))
 	else
-		set_health(victim, new_health)
+		set_health(victim, newHealth)
 
 		-- Play hit sound.
 		parse(('sv_soundpos "%s" "%d" "%d"'):format(('player/hit%d.wav'):format(math.random(3)), x, y))
@@ -543,9 +553,9 @@ function hc.health_mod.hit_hook(victim, source, wpnTypeId, hpDmg, apDmg, rawDmg,
 
 	-- Calculate armour damage for kevlar armour.
 	if apDmg > 0 then
-		local new_ap = player(victim, 'armor') - apDmg
+		local newAp = player(victim, 'armor') - apDmg
 
-		parse(('setarmor %d %d'):format(victim, new_ap))
+		parse(('setarmor %d %d'):format(victim, newAp))
 	end
 
 	return 1
@@ -567,14 +577,14 @@ function hc.health_mod.parse_hook(text)
 
 		return 2
 	elseif command.command == 'setmaxhealth' then
-		local id, max_health = unpack(command.args)
+		local id, maxHealth = unpack(command.args)
 
-		id, max_health = tonumber(id), tonumber(max_health)
+		id, maxHealth = tonumber(id), tonumber(maxHealth)
 
-		set_max_health(id, max_health)
+		set_max_health(id, maxHealth)
 		-- In CS2D the default behaviour when setting max health
 		-- is to also set the current health.
-		set_health(id, max_health)
+		set_health(id, maxHealth)
 
 		return 2
 	elseif command.command == 'mp_hud' or command.command == 'mp_hovertext' then
@@ -602,8 +612,10 @@ end
 function hc.health_mod.startround_hook(mode)
 	for id = 1, hc.SLOTS do
 		if hc.player_exists(id) and player(id, 'health') > 0 then
-			draw_health_images(id, get_health(id))
-			draw_health_symbol(id, get_health(id))
+			local health = get_health(id)
+
+			draw_health_images(id, health)
+			draw_health_symbol(id, health)
 		end
 	end
 end
@@ -620,24 +632,24 @@ function hc.health_mod.frame_hook(delta)
 	local players = player(0, 'tableliving')
 
 	for i = 1, #players do
-		local looker_id = players[i]
+		local lookerId = players[i]
 
-		local mmx, mmy = player(looker_id, 'mousemapx'), player(looker_id, 'mousemapy')
+		local mmx, mmy = player(lookerId, 'mousemapx'), player(lookerId, 'mousemapy')
 		local caught
 
 		for j = 1, #players do
-			local looked_id = players[j]
+			local lookedId = players[j]
 
-			if looker_id ~= looked_id then
-				local looked_x, looked_y = player(looked_id, 'x'), player(looked_id, 'y')
+			if lookerId ~= lookedId then
+				local lookedX, lookedY = player(lookedId, 'x'), player(lookedId, 'y')
 
-				if is_inside_rect(mmx, mmy, looked_x - PLAYER_CORE, looked_y - PLAYER_CORE, looked_x + PLAYER_CORE, looked_y + PLAYER_CORE) then
-					if can_be_seen(looker_id, looked_id) then
-						local mx, my = player(looker_id, 'mousex'), player(looker_id, 'mousey') + 24
-						local text = ('%s%d%%'):format(hc.LIME, get_health(looked_id))
+				if is_inside_rect(mmx, mmy, lookedX - PLAYER_CORE, lookedY - PLAYER_CORE, lookedX + PLAYER_CORE, lookedY + PLAYER_CORE) then
+					if can_be_seen(lookerId, lookedId) then
+						local mx, my = player(lookerId, 'mousex'), player(lookerId, 'mousey') + 24
+						local text = ('%s%d%%'):format(hc.LIME, get_health(lookedId))
 
 						parse(('hudtxt2 "%d" "%d" "%s" "%d" "%d" "%d" "%d" "%d"'):format(
-							looker_id, HOVER_HUDTXT.id, text, mx, my, 1, 1, 7))
+							lookerId, HOVER_HUDTXT.id, text, mx, my, 1, 1, 7))
 
 						caught = true
 
@@ -648,7 +660,7 @@ function hc.health_mod.frame_hook(delta)
 		end
 
 		if not caught then
-			parse(('hudtxt2 "%d" "%d" "%s"'):format(looker_id, HOVER_HUDTXT.id, ''))
+			parse(('hudtxt2 "%d" "%d" "%s"'):format(lookerId, HOVER_HUDTXT.id, ''))
 		end
 	end
 end
