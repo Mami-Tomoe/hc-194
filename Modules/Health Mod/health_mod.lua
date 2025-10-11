@@ -1,19 +1,47 @@
 ------------------------------------------------------------------------------
--- Module API
+-- Module config
 ------------------------------------------------------------------------------
 
-local cs2d_player = player
+-- Maximum number of digits to render. Example: 3 digits = 999 HP. 3 digits looks best on all resolutions.
+local MAX_DIGITS = 3
 
+-- By default when you set a player's max health, their current health
+-- gets set to the max health as well. This is the default CS2D behaviour.
+-- You may change that here.
+local SET_MAX_HEALTH_SHOULD_SET_CURRENT_HEALTH_TOO = true
+
+--- The default HUD colours built into CS2D.
+--- The colours can be changed via the options menu, but
+--- those are local to the player. Additionally the server
+--- can't check which colour configurations the player chose
+--- so we can't follow what the player chose, therefore we
+--- stick to the defaults and hope the players didn't change
+--- their colour settings.
 local HUD_COLOUR = {
-	default = { 150, 150, 0 }, -- Yellow by default.
-	critical = { 255, 0, 0 } -- Red when below 30 HP.
+	default = { 150, 150, 0 }, -- Yellow when HP > 30HP.
+	critical = { 255, 0, 0 } -- Red when HP <= 30 HP.
 }
 
+--- Same as the above, but in string format.
+--- I could've used a special function to convert
+--- the tables into strings, but that seems like overkill
+--- considering that the colours aren't supposed to be changed.
 local HUD_COLOUR_STRING = {
 	default = '\169150150000', -- Same as HUD_COLOUR but as a string.
 	critical = '\169255000000' -- Same as HUD_COLOUR but as a string.
 }
 
+--- The mouse hover HUD text configuration.
+--- It is primarily hard coded because it runs on the frame
+--- hook and needs to be as efficient as possible.
+local HOVER_HUDTXT = {
+	id = 198 -- 0-199
+}
+
+--- Configuration for the spectator HUD text that shows up
+--- when a player is spectating another player.
+--- The HUD text is necessary because you can't hide/change
+--- the health value visible to spectators.
 local SPEC_HUDTXT = {
 	id = 199,             -- 0-199
 	colour = hc.SPEC_YELLOW, -- Refer to hc/core/constants.lua
@@ -21,51 +49,61 @@ local SPEC_HUDTXT = {
 	y = 480 - 40          -- Do not touch.
 }
 
-local HOVER_HUDTXT = {
-	id = 198 -- 0-199
-}
+-- Space between health HUD numbers.
+local HUD_MARGIN_X = 27
 
-local MAX_DIGITS = 3                                            -- 3 = 999 HP MAX
-local HUD_MARGIN_X = 27                                         -- Do not touch.
-local HUD_START_X = 41 + (HUD_MARGIN_X * MAX_DIGITS)            -- Do not touch.
+-- Where to start drawing the HUD numbers on the X axis.
+local HUD_START_X = 41 + (HUD_MARGIN_X * MAX_DIGITS)
 
-local HUD_NUM_SCALE = { 0.45, 0.45 }                            -- Do not touch.
-local HUD_SYM_SCALE = { 0.42, 0.42 }                            -- Do not touch.
+-- Scale for the health number HUD.
+local HUD_NUM_SCALE = { 0.45, 0.45 }
 
-local MAX_HEALTH_ALLOWED = tonumber(('9'):rep(MAX_DIGITS)) or 1 -- Do not touch.
+-- Scale for the health symbol HUD.
+local HUD_SYM_SCALE = { 0.42, 0.42 }
 
-local parse_lock = true                                         -- Do not touch especially.
-local kill_info                                                 -- Do not touch.
+-- Maximum health allowed (based on the number of digits).
+-- You're not supposed to change this.
+local MAX_HEALTH_ALLOWED = tonumber(('9'):rep(MAX_DIGITS)) or 1
 
-local PLAYER_CORE = 20                                          -- Do not touch.
-local ZOMBIE_SPRAY_RECOVER = 20                                 -- Do not touch.
-local DISPENSER_RANGE = 36                                      -- Do not touch.
+-- Player core size.
+local PLAYER_CORE = 20
 
-local math_atan2 = math.atan2                                   -- Do not touch.
-local math_cos = math.cos                                       -- Do not touch.
-local math_sin = math.sin                                       -- Do not touch.
-local math_sqrt = math.sqrt                                     -- Do not touch.
-local math_floor = math.floor                                   -- Do not touch.
+-- Zombie spray health recovery.
+-- I think this is hard-coded into CS2D.
+local ZOMBIE_SPRAY_RECOVER = 20
 
----There is one limitation about this mod:
----You cannot be "one-shot" if your custom health is set to anything higher than 250.
+-- Dispenser pixel range to players.
+local DISPENSER_RANGE = 36
+
+------------------------------------------------------------------------------
+-- Module API
+------------------------------------------------------------------------------
+
+local parse_lock = true
+local kill_info
+local current_game_mode
+
+local cs2d_player = player
+
+local math_atan2 = math.atan2
+local math_cos = math.cos
+local math_sin = math.sin
+local math_sqrt = math.sqrt
+local math_floor = math.floor
+
+--- There is one limitation about this mod:
+--- You cannot be "one-shot" if your custom health is set to anything higher than 250.
 ---
----The technical explanation is that CS2D only sends the damage taken in the
----hit hook and not the incoming damage.
+--- The technical explanation is that CS2D only sends the damage taken in the hit hook and not the incoming damage.
 ---
----This means if a player has 250 HP (CS2D max), and you shoot at them with a weapon
----like a laser, that usually deals 1000 damage, the hit hook will only display the rawDmg
----as 250, because the player can't take any more than that.
+--- This means if a player has 250 HP (CS2D max), and you shoot at them with a weapon like a laser, that usually deals 1000 damage, the hit hook will only display the raw damage as 250, because the player can't take any more than that.
 ---
----When calculating the damage to deduct from the custom health mod system, we deduct the 250
----because we don't know the player took so much more (again, the hit hook doesn't pass that value).
+--- When calculating the damage to deduct from the custom health mod system, we deduct the 250 because we don't know the player took so much more (again, the hit hook doesn't pass that value).
 ---
----This means players cannot take more than 250 HP at a time in this mod.
+--- This means players cannot take more than 250 HP at a time in this mod.
 ---
----The workaround would be to have a more robust system for calculating damage (taking weapon damage,
----player armour and other variables into account to calculate the incoming damage).
----But that is simply too much work. It would be a whole lot easier to just hard-code some weapons to
----kill on hit or extend this module with the same principle in mind.
+--- The workaround would be to have a more robust system for calculating damage (taking weapon damage, player armour and other variables into account to calculate the incoming damage).
+--- But that is simply too much work. It would be a whole lot easier to just hard-code some weapons to kill on hit or extend this module with the same principle in mind.
 function hc.health_mod.init()
 	-- Hide the health HUD (127 - 1).
 	parse(('mp_hud %d'):format(126))
@@ -98,19 +136,26 @@ end
 -- Internal functions
 ------------------------------------------------------------------------------
 
+---Prints an error to the console.
+---You may replace this function with your own.
+---@param message string message to print
 local function print_error(message)
 	print(('%sError: %s'):format(hc.RED, message))
 end
 
+---Returns a weapon's name and its image path in a CSV format.
+---@param wpnTypeId number weapon type number identifier
+---@param objId number object number identifier
+---@return string|'': string with weapon name separated by comma and followed by the image path or object name or empty string
 local function get_weapon_name_and_image_path(wpnTypeId, objId)
 	local wpnName = itemtype(wpnTypeId, 'name')
 
-	-- Died to weapon.
+	-- Died to a weapon.
 	if wpnName then
 		return ('%s,gfx/weapons/%s_k.bmp'):format(wpnName, wpnName)
 	end
 
-	-- Died to object.
+	-- Died to an object.
 	if objId > 0 then
 		return object(objId, 'typename')
 	end
@@ -118,6 +163,9 @@ local function get_weapon_name_and_image_path(wpnTypeId, objId)
 	return ''
 end
 
+---Attempts to read a CS2D command from the input text.
+---@param text string command text
+---@return { command: string|'', args:table<string> }: table with "command" string and "args" table
 local function read_command(text)
 	text = text or ''
 
@@ -186,10 +234,15 @@ local function get_colour_based_on_health(health, asString)
 	return (asString and HUD_COLOUR_STRING.default) or HUD_COLOUR.default
 end
 
+---Clamps the health amount given to the maximum health allowed.
+---@param amount number health amount
+---@return number: clamped amount
 local function clamp_max_allowed(amount)
 	return math.min(MAX_HEALTH_ALLOWED, amount)
 end
 
+---Removes the health symbol HUD to a player.
+---@param p number player number identifier
 local function free_health_symbol(p)
 	if hc.players[p].health_mod.images.symbol then
 		freeimage(hc.players[p].health_mod.images.symbol)
@@ -198,6 +251,9 @@ local function free_health_symbol(p)
 	end
 end
 
+---Draws the health symbol HUD to a player.
+---@param p number player number identifier
+---@param amount number health amount
 local function draw_health_symbol(p, amount)
 	free_health_symbol(p)
 
@@ -216,6 +272,8 @@ local function draw_health_symbol(p, amount)
 	hc.players[p].health_mod.images.symbol = symbolImg
 end
 
+---Removes the health numbers HUD to a player.
+---@param p number player number identifier
 local function free_health_images(p)
 	local images = hc.players[p].health_mod.images.numbers
 
@@ -226,6 +284,9 @@ local function free_health_images(p)
 	hc.players[p].health_mod.images.numbers = {}
 end
 
+---Draws the health numbers HUD to a player.
+---@param p number player number identifier
+---@param amount number health amount
 local function draw_health_images(p, amount)
 	free_health_images(p)
 
@@ -253,14 +314,22 @@ local function draw_health_images(p, amount)
 	end
 end
 
+---Returns the amount of health the player has.
+---@param p number player number identifier
+---@return number: player current health value
 local function get_health(p)
 	return hc.players[p].health_mod.health
 end
 
+---Returns the maximum amount of health the player can have.
+---@param p number player number identifier
+---@return number: player max health value
 local function get_max_health(p)
 	return hc.players[p].health_mod.max_health
 end
 
+---Updates the spectating HUD text for a spectator.
+---@param p number player number identifier
 local function update_spec_hudtxt(p)
 	local target = hc.players[p].health_mod.spectating
 	local text
@@ -281,6 +350,8 @@ local function update_spec_hudtxt(p)
 		p, SPEC_HUDTXT.id, text, SPEC_HUDTXT.x, SPEC_HUDTXT.y, 1, 1, 11))
 end
 
+---Frees the spectating HUD text for a spectator.
+---@param p number player number identifier
 local function free_spec(p)
 	local oldTarget = hc.players[p].health_mod.spectating
 
@@ -299,6 +370,9 @@ local function free_spec(p)
 	update_spec_hudtxt(p)
 end
 
+---Sets someone as spectating someone else.
+---@param p number player number identifier (spectator)
+---@param target number target number identifier (spectated)
 local function set_spec(p, target)
 	free_spec(p)
 
@@ -311,6 +385,8 @@ local function set_spec(p, target)
 	update_spec_hudtxt(p)
 end
 
+---Updates all spectators of this player.
+---@param p number player number identifier (spectated)
 local function update_spectators(p)
 	local specs = hc.players[p].health_mod.spectators
 
@@ -321,6 +397,9 @@ local function update_spectators(p)
 	end
 end
 
+---Sets a player's health.
+---@param p number player number identifier
+---@param health number health amount
 local function set_health(p, health)
 	health = health or 1
 
@@ -344,6 +423,9 @@ local function set_health(p, health)
 	update_spectators(p)
 end
 
+---Sets a player's max health.
+---@param p number player number identifier
+---@param maxHealth number max health amount
 local function set_max_health(p, maxHealth)
 	maxHealth = maxHealth or 1
 
@@ -364,6 +446,10 @@ local function set_max_health(p, maxHealth)
 	update_spectators(p)
 end
 
+---Shows kill info to a victim of their killer.
+---Will not draw the background image (as that is not currently possible).
+---@param victim number player number identifier
+---@param killer number player number identifier
 local function show_kill_info(victim, killer)
 	if not kill_info then
 		return
@@ -386,10 +472,25 @@ local function show_kill_info(victim, killer)
 	})
 end
 
+---Checks if the given coordinate is within a rectangle.
+---@param x number horizontal axis coordinate
+---@param y number vertical axis coordinate
+---@param x1 number top-left horizontal rectangle coordinate
+---@param y1 number top-left vertical rectangle coordinate
+---@param x2 number bottom-right horizontal rectangle coordinate
+---@param y2 number bottom-right vertical rectangle coordinate
+---@return boolean: `true` if inside or `false` if not
 local function is_inside_rect(x, y, x1, y1, x2, y2)
 	return x >= x1 and x <= x2 and y >= y1 and y <= y2
 end
 
+---Checks if two points (source and impact) have an obstacle between them.
+---@param sourceX number source horizontal axis coordinate
+---@param sourceY number source vertical axis coordinate
+---@param impactX number impact horizontal axis coordinate
+---@param impactY number impact vertical axis coordinate
+---@param includesObstacles boolean `true` to consider obstacles as walls or `false` to only consider walls
+---@return table<number, number>|false: if blocked a table with the coordinates to the object that blocked the ray, otherwise returns `false`
 local function raycast_wall(sourceX, sourceY, impactX, impactY, includesObstacles)
 	local function is_tile_wall(tx, ty)
 		local tile_get = tile
@@ -434,6 +535,10 @@ local function raycast_wall(sourceX, sourceY, impactX, impactY, includesObstacle
 	return false
 end
 
+---Checks if a player can be seen by another player.
+---@param lookerId number player number identifier (the one looking)
+---@param lookedId number player number identifier (the one being looked at)
+---@return boolean: `true` if "looked" should be visible to "looker", otherwise `false`
 local function can_be_seen(lookerId, lookedId)
 	-- Game mode check.
 	if tonumber(game('sv_gamemode')) == hc.DEATHMATCH then
@@ -462,6 +567,9 @@ end
 -- Public functions
 ------------------------------------------------------------------------------
 
+---For internal use only.
+---Dictates whether the parse hook in this file should be active or not.
+---@param state boolean when `true` the parse hook is active, and when `false` the parse hook is inactive.
 function hc.health_mod.set_parse_lock(state)
 	parse_lock = state
 end
@@ -470,6 +578,11 @@ end
 -- Overrides
 ------------------------------------------------------------------------------
 
+---Override for the player function to return health/max health values from this script
+---as opposed to what CS2D thinks they should be.
+---@param p any
+---@param value any
+---@return number
 player = function(p, value)
 	if value == 'health' then
 		return get_health(p)
@@ -537,10 +650,10 @@ function hc.health_mod.hit_hook(victim, source, wpnTypeId, hpDmg, apDmg, rawDmg,
 	local x, y = player(victim, 'x'), player(victim, 'y')
 
 	if newHealth <= 0 then
-		local weapon_name_and_image_path = get_weapon_name_and_image_path(wpnTypeId, objId)
+		local weaponNameAndImagePath = get_weapon_name_and_image_path(wpnTypeId, objId)
 
 		-- set_health is called on the die_hook, so no need to call it here.
-		parse(('customkill "%d" "%s" "%d"'):format(source, weapon_name_and_image_path, victim))
+		parse(('customkill "%d" "%s" "%d"'):format(source, weaponNameAndImagePath, victim))
 
 		-- Play die sound.
 		parse(('sv_soundpos "%s" "%d" "%d"'):format(('player/die%d.wav'):format(math.random(3)), x, y))
@@ -584,7 +697,9 @@ function hc.health_mod.parse_hook(text)
 		set_max_health(id, maxHealth)
 		-- In CS2D the default behaviour when setting max health
 		-- is to also set the current health.
-		set_health(id, maxHealth)
+		if SET_MAX_HEALTH_SHOULD_SET_CURRENT_HEALTH_TOO then
+			set_health(id, maxHealth)
+		end
 
 		return 2
 	elseif command.command == 'mp_hud' or command.command == 'mp_hovertext' then
@@ -610,6 +725,8 @@ function hc.health_mod.post_endround_hook()
 end
 
 function hc.health_mod.startround_hook(mode)
+	current_game_mode = tonumber(game('sv_gamemode'))
+
 	for id = 1, hc.SLOTS do
 		if hc.player_exists(id) and player(id, 'health') > 0 then
 			local health = get_health(id)
@@ -635,7 +752,6 @@ function hc.health_mod.frame_hook(delta)
 		local lookerId = players[i]
 
 		local mmx, mmy = player(lookerId, 'mousemapx'), player(lookerId, 'mousemapy')
-		local caught
 
 		for j = 1, #players do
 			local lookedId = players[j]
@@ -651,24 +767,20 @@ function hc.health_mod.frame_hook(delta)
 						parse(('hudtxt2 "%d" "%d" "%s" "%d" "%d" "%d" "%d" "%d"'):format(
 							lookerId, HOVER_HUDTXT.id, text, mx, my, 1, 1, 7))
 
-						caught = true
-
 						return -- No more code to execute.
 					end
 				end
 			end
 		end
 
-		if not caught then
-			parse(('hudtxt2 "%d" "%d" "%s"'):format(lookerId, HOVER_HUDTXT.id, ''))
-		end
+		parse(('hudtxt2 "%d" "%d" "%s"'):format(lookerId, HOVER_HUDTXT.id, ''))
 	end
 end
 
 function hc.health_mod.second_hook()
 	local players = player(0, 'tableliving')
 
-	local isZombies = tonumber(game('sv_gamemode')) == hc.ZOMBIES
+	local isZombies = current_game_mode == hc.ZOMBIES
 	local zombieHeal = tonumber(game('mp_zombierecover'))
 
 	local dispenserHeal = tonumber(game('mp_dispenser_health'))
@@ -684,8 +796,10 @@ function hc.health_mod.second_hook()
 				toHeal = toHeal + 10
 			end
 
+			local playerTeam = player(id, 'team')
+
 			-- Heal zombies.
-			if isZombies and player(id, 'team') == hc.T then
+			if isZombies and playerTeam == hc.T then
 				toHeal = toHeal + zombieHeal
 			end
 
@@ -696,8 +810,6 @@ function hc.health_mod.second_hook()
 				local nearbyDispensersC = #nearbyDispensers
 
 				if nearbyDispensersC > 0 then
-					local playerTeam = player(id, 'team')
-
 					for j = 1, nearbyDispensersC do
 						local dispenser = nearbyDispensers[j]
 
@@ -737,7 +849,7 @@ function hc.health_mod.second_hook()
 end
 
 function hc.health_mod.spray_hook(p)
-	if tonumber(game('sv_gamemode')) ~= hc.ZOMBIES then
+	if current_game_mode ~= hc.ZOMBIES then
 		return
 	elseif player(p, 'team') ~= hc.T then
 		return
