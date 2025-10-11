@@ -118,6 +118,7 @@ function hc.health_mod.init()
 	parse(('mp_killinfo '):format(0))
 
 	-- Hooks.
+	addhook('init', 'hc.health_mod.init_hook')
 	addhook('init_player', 'hc.health_mod.init_player_hook', -999999)
 	addhook('delete_player', 'hc.health_mod.delete_player_hook', -999999)
 	addhook('spawn', 'hc.health_mod.spawn_hook', -999999)
@@ -596,6 +597,10 @@ end
 ------------------------------------------------------------------------------
 -- Hooks
 ------------------------------------------------------------------------------
+
+function hc.health_mod.init_hook()
+	current_game_mode = tonumber(game('sv_gamemode'))
+end
 
 function hc.health_mod.init_player_hook(p, reason)
 	if reason == hc.SCRIPT_INIT then
