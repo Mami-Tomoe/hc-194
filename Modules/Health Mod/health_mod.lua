@@ -12,7 +12,7 @@ local SET_MAX_HEALTH_SHOULD_SET_CURRENT_HEALTH_TOO = true
 
 --- The default HUD colours built into CS2D.
 --- The colours can be changed via the options menu, but
---- those are local to the player. Additionally the server
+--- those are local to the player. Additionally, the server
 --- can't check which colour configurations the player chose
 --- so we can't follow what the player chose, therefore we
 --- stick to the defaults and hope the players didn't change
@@ -45,8 +45,8 @@ local HOVER_HUDTXT = {
 local SPEC_HUDTXT = {
 	id = 199,             -- 0-199
 	colour = hc.SPEC_YELLOW, -- Refer to hc/core/constants.lua
-	x = 850 / 2,          -- Do not touch.
-	y = 480 - 40          -- Do not touch.
+	x = 850 / 2,
+	y = 480 - 40
 }
 
 -- Space between health HUD numbers.
@@ -68,12 +68,23 @@ local MAX_HEALTH_ALLOWED = tonumber(('9'):rep(MAX_DIGITS)) or 1
 -- Player core size.
 local PLAYER_CORE = 20
 
+-- Dispenser pixel range to players.
+local DISPENSER_RANGE = PLAYER_CORE + 16
+
 -- Zombie spray health recovery.
 -- I think this is hard-coded into CS2D.
 local ZOMBIE_SPRAY_RECOVER = 20
 
--- Dispenser pixel range to players.
-local DISPENSER_RANGE = 36
+-- Medic armour (armour: 204, item: 82) heal per second (when worn).
+local MEDIC_ARMOUR_HEAL_PER_SEC = 10
+
+-- Default CS2D health values for players.
+local CS2D_HEALTH_PRESET = {
+	default = 100,
+	critical = 30,
+	minimum = 0,
+	maximum = 250
+}
 
 ------------------------------------------------------------------------------
 -- Module API
@@ -113,7 +124,7 @@ function hc.health_mod.init()
 
 	-- Hide the kill info (if enabled),
 	-- and replace it with a custom one.
-	kill_info = game('mp_killinfo')
+	kill_info = tonumber(game('mp_killinfo'))
 
 	parse(('mp_killinfo '):format(0))
 
@@ -228,7 +239,7 @@ end
 ---@param asString boolean
 ---@return table|string
 local function get_colour_based_on_health(health, asString)
-	if health <= 30 then
+	if health <= CS2D_HEALTH_PRESET.critical then
 		return (asString and HUD_COLOUR_STRING.critical) or HUD_COLOUR.critical
 	end
 
@@ -258,7 +269,7 @@ end
 local function draw_health_symbol(p, amount)
 	free_health_symbol(p)
 
-	if amount <= 0 then
+	if amount <= CS2D_HEALTH_PRESET.minimum then
 		return
 	end
 
@@ -269,6 +280,7 @@ local function draw_health_symbol(p, amount)
 	imagecolor(symbolImg, unpack(get_colour_based_on_health(amount, false)))
 	imagescale(symbolImg, unpack(HUD_SYM_SCALE))
 	imageframe(symbolImg, 1)
+	imageblend(symbolImg, 1)
 
 	hc.players[p].health_mod.images.symbol = symbolImg
 end
@@ -291,7 +303,7 @@ end
 local function draw_health_images(p, amount)
 	free_health_images(p)
 
-	if amount <= 0 then
+	if amount <= CS2D_HEALTH_PRESET.minimum then
 		return
 	end
 
@@ -309,6 +321,7 @@ local function draw_health_images(p, amount)
 			imagecolor(digitImg, unpack(get_colour_based_on_health(amount, false)))
 			imagescale(digitImg, unpack(HUD_NUM_SCALE))
 			imageframe(digitImg, digitNum + 1)
+			imageblend(digitImg, 1)
 
 			images[i] = digitImg
 		end
@@ -402,7 +415,7 @@ end
 ---@param p number player number identifier
 ---@param health number health amount
 local function set_health(p, health)
-	health = health or 1
+	health = health or (CS2D_HEALTH_PRESET.minimum + 1)
 
 	if not hc.player_exists(p) then
 		return print_error(('Player "%s" does not exist.'):format(p))
@@ -428,7 +441,7 @@ end
 ---@param p number player number identifier
 ---@param maxHealth number max health amount
 local function set_max_health(p, maxHealth)
-	maxHealth = maxHealth or 1
+	maxHealth = maxHealth or (CS2D_HEALTH_PRESET.minimum + 1)
 
 	if not hc.player_exists(p) then
 		return print_error(('Player "%s" does not exist.'):format(p))
@@ -542,7 +555,7 @@ end
 ---@return boolean: `true` if "looked" should be visible to "looker", otherwise `false`
 local function can_be_seen(lookerId, lookedId)
 	-- Game mode check.
-	if tonumber(game('sv_gamemode')) == hc.DEATHMATCH then
+	if current_game_mode == hc.DEATHMATCH then
 		return false
 	end
 
@@ -608,8 +621,8 @@ function hc.health_mod.init_player_hook(p, reason)
 	end
 
 	hc.players[p].health_mod = {
-		health = 0,
-		max_health = 100,
+		health = CS2D_HEALTH_PRESET.minimum,
+		max_health = CS2D_HEALTH_PRESET.maximum,
 		images = {
 			symbol = nil,
 			numbers = {}
@@ -633,12 +646,12 @@ function hc.health_mod.spawn_hook(p)
 	timer(0, 'parse', ('lua hc.health_mod.set_parse_lock(%s)'):format('true'))
 
 	-- This initialises the player.
-	set_health(p, get_max_health(p))
+	set_health(p, CS2D_HEALTH_PRESET.default)
 	set_spec(p, 0)
 end
 
 function hc.health_mod.die_hook(victim, killer, wpnTypeId, x, y, objId)
-	set_health(victim, 0)
+	set_health(victim, CS2D_HEALTH_PRESET.minimum)
 	set_spec(victim, player(victim, 'spectating'))
 
 	if killer > 0 then
@@ -647,14 +660,14 @@ function hc.health_mod.die_hook(victim, killer, wpnTypeId, x, y, objId)
 end
 
 function hc.health_mod.hit_hook(victim, source, wpnTypeId, hpDmg, apDmg, rawDmg, objId)
-	if hpDmg <= 0 then
+	if hpDmg <= CS2D_HEALTH_PRESET.minimum then
 		return 1
 	end
 
 	local newHealth = get_health(victim) - hpDmg
 	local x, y = player(victim, 'x'), player(victim, 'y')
 
-	if newHealth <= 0 then
+	if newHealth <= CS2D_HEALTH_PRESET.minimum then
 		local weaponNameAndImagePath = get_weapon_name_and_image_path(wpnTypeId, objId)
 
 		-- set_health is called on the die_hook, so no need to call it here.
@@ -798,7 +811,7 @@ function hc.health_mod.second_hook()
 		if curHealth < get_max_health(id) then
 			-- Heal 10 HP/s for medic armour wearers.
 			if player(id, 'armor') == 204 then
-				toHeal = toHeal + 10
+				toHeal = toHeal + MEDIC_ARMOUR_HEAL_PER_SEC
 			end
 
 			local playerTeam = player(id, 'team')
