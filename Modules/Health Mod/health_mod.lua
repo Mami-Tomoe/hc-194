@@ -148,13 +148,6 @@ end
 -- Internal functions
 ------------------------------------------------------------------------------
 
----Prints an error to the console.
----You may replace this function with your own.
----@param message string message to print
-local function print_error(message)
-	print(('%sError: %s'):format(hc.RED, message))
-end
-
 ---Returns a weapon's name and its image path in a CSV format.
 ---@param wpnTypeId number weapon type number identifier
 ---@param objId number object number identifier
@@ -413,12 +406,12 @@ end
 
 ---Sets a player's health.
 ---@param p number player number identifier
----@param health number health amount
+---@param health? number health amount
 local function set_health(p, health)
 	health = health or (CS2D_HEALTH_PRESET.minimum + 1)
 
 	if not hc.player_exists(p) then
-		return print_error(('Player "%s" does not exist.'):format(p))
+		return error(('Player "%s" does not exist.'):format(tostring(p)))
 	end
 
 	-- Clamp to max health.
@@ -439,12 +432,12 @@ end
 
 ---Sets a player's max health.
 ---@param p number player number identifier
----@param maxHealth number max health amount
+---@param maxHealth? number max health amount
 local function set_max_health(p, maxHealth)
 	maxHealth = maxHealth or (CS2D_HEALTH_PRESET.minimum + 1)
 
 	if not hc.player_exists(p) then
-		return print_error(('Player "%s" does not exist.'):format(p))
+		return error(('Player "%s" does not exist.'):format(tostring(p)))
 	end
 
 	-- Clamp to max allowed.
@@ -622,7 +615,7 @@ function hc.health_mod.init_player_hook(p, reason)
 
 	hc.players[p].health_mod = {
 		health = CS2D_HEALTH_PRESET.minimum,
-		max_health = CS2D_HEALTH_PRESET.maximum,
+		max_health = CS2D_HEALTH_PRESET.default,
 		images = {
 			symbol = nil,
 			numbers = {}
@@ -704,6 +697,10 @@ function hc.health_mod.parse_hook(text)
 
 		id, health = tonumber(id), tonumber(health)
 
+		if not id then
+			return error(('Player ID "%s" is not valid.'):format(tostring(id)))
+		end
+
 		set_health(id, health)
 
 		return 2
@@ -711,6 +708,10 @@ function hc.health_mod.parse_hook(text)
 		local id, maxHealth = unpack(command.args)
 
 		id, maxHealth = tonumber(id), tonumber(maxHealth)
+
+		if not id then
+			return error(('Player ID "%s" is not valid.'):format(tostring(id)))
+		end
 
 		set_max_health(id, maxHealth)
 		-- In CS2D the default behaviour when setting max health
@@ -721,7 +722,7 @@ function hc.health_mod.parse_hook(text)
 
 		return 2
 	elseif command.command == 'mp_hud' or command.command == 'mp_hovertext' then
-		print_error(('Changing "%s" when using the Health Mod module is not supported.'):format(command.command))
+		error(('Changing "%s" when using the Health Mod module is not supported.'):format(command.command))
 
 		return 2
 	elseif command.command == 'mp_killinfo' then
