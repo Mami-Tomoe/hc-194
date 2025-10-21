@@ -1,0 +1,2 @@
+This module will implement the "mshooks" feature.
+Using this module, developers may add time based hooks for any time interval that they desire.
