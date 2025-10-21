@@ -47,7 +47,7 @@ function hc.mshooks.add_hook(ms, func, prio)
 		func = _G[func]
 	end
 
-	-- Creates a timer "hook".
+	-- Creates a timer "hook" if it hasn't been already.
 	if not has_timer_for(ms) then
 		timer(ms, 'hc.mshooks.ms_cb', tostring(ms), 0)
 	end
@@ -102,7 +102,7 @@ function hc.mshooks.free_hook(ms, func)
 		return
 	end
 
-	-- Creates a timer "hook".
+	-- Frees a timer "hook" if it isn't used anymore.
 	if not has_timer_for(ms) then
 		freetimer('hc.mshooks.ms_cb', tostring(ms))
 	end
