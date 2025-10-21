@@ -3,20 +3,20 @@
 
 -- Configuration:
 hc.RANDOM_ITEMS_CONFIG = {
-	spawnerItem = 86, -- Gut Bomb
+	spawnerItem = hc.GUT_BOMB, -- Gut Bomb
 	chance = 100,
-	defaultItemID = 35, -- AWP
+	defaultItemID = hc.AWP, -- AWP
 	weaponTypes = {
 		{
-			id = 84, -- Stealth Suit
+			id = hc.STEALTH_SUIT, -- Stealth Suit
 			chance = 30
 		},
 		{
-			id = 45, -- Laser
+			id = hc.LASER, -- Laser
 			chance = 20
 		},
 		{
-			id = 34, --Scout
+			id = hc.SCOUT, -- Scout
 		    chance = 20
 		}
 	}
