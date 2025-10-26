@@ -75,7 +75,7 @@ function hc.mshooks.add_hook(ms, func, prio)
 	end
 end
 
----Removes a function from_csv a timer hook.
+---Removes a function from a timer hook.
 ---@param ms number milliseconds
 ---@param func string|function function
 function hc.mshooks.free_hook(ms, func)
